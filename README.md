@@ -26,8 +26,9 @@ graph TD
 - **Frontend Layer:** React 18 with Vite for blazing-fast local development and HMR. We utilized **Tailwind CSS V4** and **Lucide React** to build a strict, monochromatic, "Enterprise-Grade" minimalist user interface that remains highly legible and performant. State is managed globally via **Zustand**, allowing seamless role-based routing (`/employee`, `/manager`, `/admin`).
 - **Backend Infrastructure (BaaS):** We adopted a fully serverless approach using **Firebase**.
   - **Firebase Auth:** Handles secure session creation.
-  - **Firestore Database (NoSQL):** Powers the core logic. We utilized *Firestore Batch Writes* (`writeBatch`) to ensure atomicity when submitting up to 8 goals at once. 
+  - **Firestore Database (NoSQL):** Powers the core logic. We utilized *Firestore Batch Writes* (`writeBatch`) to ensure atomicity when submitting up to 8 goals at once. Global system states (e.g., active Quarterly Check-In phases) are handled via centralized Firestore documents to lock/unlock UI interactions in real-time.
   - **Firebase Hosting:** Provides a global CDN ensuring lightning-fast load times for the portal, with an automated CI/CD-style build script for updates.
+- **Enterprise Governance & Computation:** Strict adherence to BRD requirements. The system automatically computes mathematical progress scores based on UoM (Max vs Min targets). Furthermore, the Admin can toggle "Quarterly Windows" (e.g., Q1, Q2) to physically lock or unlock employee progress updates, preventing out-of-cycle tampering.
 - **AI Integration:** Instead of standard hardcoded placeholders, we integrated **OpenRouter** securely into the frontend. By passing the Thrust Area and Goal Title to the `anthropic/claude-3-haiku` model with a strict system prompt, the AI acts as a digital HR coach, instantly generating concise SMART goals for the employee.
 - **Reporting & Data Visualization:** Used `recharts` for building real-time compliance dashboards (Pie & Bar charts) and `xlsx` (SheetJS) to allow Admins to pull 1-click Excel exports of the entire organization's NoSQL data tree.
 
