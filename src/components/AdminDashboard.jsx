@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, query, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, addDoc, serverTimestamp, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import * as XLSX from 'xlsx';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
@@ -13,6 +13,9 @@ export default function AdminDashboard() {
   // Roster Form State
   const [empEmail, setEmpEmail] = useState('');
   const [mgrEmail, setMgrEmail] = useState('');
+  
+  // System Phase
+  const [activePhase, setActivePhase] = useState('Goal Setting');
 
   useEffect(() => {
     fetchData();
@@ -27,6 +30,13 @@ export default function AdminDashboard() {
       const qAlloc = query(collection(db, 'allocations'), orderBy('createdAt', 'desc'));
       const snapAlloc = await getDocs(qAlloc);
       setAllocations(snapAlloc.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      
+      const snapSettings = await getDoc(doc(db, 'settings', 'system'));
+      if (snapSettings.exists()) {
+        setActivePhase(snapSettings.data().activePhase);
+      } else {
+        await setDoc(doc(db, 'settings', 'system'), { activePhase: 'Goal Setting' });
+      }
     } catch (err) {
       console.error(err);
     }
@@ -49,6 +59,16 @@ export default function AdminDashboard() {
         fetchData();
     } catch (err) {
         alert("Error allocating: " + err.message);
+    }
+  };
+
+  const handleUpdatePhase = async (newPhase) => {
+    setActivePhase(newPhase);
+    try {
+        await setDoc(doc(db, 'settings', 'system'), { activePhase: newPhase }, { merge: true });
+        alert(`System Phase successfully updated to: ${newPhase}`);
+    } catch (err) {
+        alert("Error updating phase: " + err.message);
     }
   };
 
@@ -90,9 +110,21 @@ export default function AdminDashboard() {
           <h2 className="text-3xl font-black text-slate-800 tracking-tight">Admin Control Center</h2>
           <p className="text-slate-500 mt-1">Manage global analytics, audits, and roster allocations.</p>
         </div>
-        <button onClick={exportToExcel} className="bg-slate-900 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-slate-800 transition-colors shadow-sm flex items-center gap-2">
-          <FileDown className="w-5 h-5" /> Export Data
-        </button>
+        <div className="flex gap-4">
+            <div className="bg-white border border-slate-200 rounded-lg p-1.5 flex items-center shadow-sm">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 px-3">System Phase:</span>
+                <select value={activePhase} onChange={e=>handleUpdatePhase(e.target.value)} className="bg-slate-50 border border-slate-200 rounded text-sm font-bold p-1.5 outline-none text-slate-800 focus:border-primary">
+                    <option value="Goal Setting">Goal Setting</option>
+                    <option value="Q1 Check-in">Q1 Check-in</option>
+                    <option value="Q2 Check-in">Q2 Check-in</option>
+                    <option value="Q3 Check-in">Q3 Check-in</option>
+                    <option value="Q4 Check-in">Q4 Check-in</option>
+                </select>
+            </div>
+            <button onClick={exportToExcel} className="bg-slate-900 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-slate-800 transition-colors shadow-sm flex items-center gap-2">
+            <FileDown className="w-5 h-5" /> Export Data
+            </button>
+        </div>
       </div>
 
       {/* Roster Allocation Module */}

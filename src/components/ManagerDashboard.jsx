@@ -120,6 +120,21 @@ export default function ManagerDashboard() {
     return acc;
   }, {});
 
+  const computeScore = (actual, target, uom) => {
+      if (actual === undefined || actual === null) return null;
+      const act = Number(actual);
+      const tgt = Number(target);
+      if (tgt === 0) return 0;
+      let score = 0;
+      if (uom === 'min') {
+          score = (act / tgt) * 100;
+      } else {
+          if (act === 0) return 100;
+          score = (tgt / act) * 100;
+      }
+      return Math.max(0, Math.round(score));
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-8 pb-20">
       <div>
@@ -231,14 +246,23 @@ export default function ManagerDashboard() {
                                     </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100">
-                                    {employeeGoals.map((g) => (
+                                    {employeeGoals.map((g) => {
+                                        const score = computeScore(g.actualAchievement, g.target, g.uomType);
+                                        return (
                                         <tr key={g.id} className="hover:bg-slate-50 transition-colors">
                                         <td className="px-6 py-4">
                                             {g.isShared && <span className="bg-slate-800 text-white text-[10px] uppercase font-black px-1.5 py-0.5 rounded mr-2">Shared</span>}
                                             <span className="text-slate-700 font-medium">{g.title}</span>
                                         </td>
                                         <td className="px-6 py-4 text-slate-800 font-bold text-right">{g.target} {g.uomType}</td>
-                                        <td className="px-6 py-4 text-primary font-black text-right">{g.actualAchievement || '-'}</td>
+                                        <td className="px-6 py-4 text-primary font-black text-right flex justify-end items-center gap-2">
+                                            {g.actualAchievement || '-'}
+                                            {score !== null && (
+                                                <span className={`text-xs px-2 py-0.5 rounded font-black text-white ${score >= 100 ? 'bg-emerald-500' : score >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}>
+                                                    {score}%
+                                                </span>
+                                            )}
+                                        </td>
                                         <td className="px-6 py-4">
                                             {g.status === 'pending' ? (
                                                 <span className="text-amber-600 text-xs font-bold uppercase">Pending</span>
@@ -249,7 +273,7 @@ export default function ManagerDashboard() {
                                             )}
                                         </td>
                                         </tr>
-                                    ))}
+                                    )})}
                                     </tbody>
                                 </table>
                             </div>

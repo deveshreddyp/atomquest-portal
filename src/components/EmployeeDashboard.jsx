@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
-import { collection, serverTimestamp, writeBatch, doc, query, where, getDocs, updateDoc } from 'firebase/firestore';
+import { collection, serverTimestamp, writeBatch, doc, query, where, getDocs, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuthStore } from '../store';
 import { Target, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -9,6 +9,7 @@ export default function EmployeeDashboard() {
   const { user } = useAuthStore();
   const [existingGoals, setExistingGoals] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activePhase, setActivePhase] = useState('Goal Setting');
 
   const { register, control, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
@@ -31,6 +32,9 @@ export default function EmployeeDashboard() {
 
   const fetchMyGoals = async () => {
     try {
+      const snapSettings = await getDoc(doc(db, 'settings', 'system'));
+      if (snapSettings.exists()) setActivePhase(snapSettings.data().activePhase);
+
       const q = query(collection(db, 'goals'), where('employeeEmail', '==', user.email));
       const snapshot = await getDocs(q);
       if (!snapshot.empty) {
@@ -121,6 +125,21 @@ export default function EmployeeDashboard() {
       } catch (err) { alert("Failed to update weight."); }
   };
 
+  const computeScore = (actual, target, uom) => {
+      if (actual === undefined || actual === null) return null;
+      const act = Number(actual);
+      const tgt = Number(target);
+      if (tgt === 0) return 0;
+      let score = 0;
+      if (uom === 'min') {
+          score = (act / tgt) * 100;
+      } else {
+          if (act === 0) return 100;
+          score = (tgt / act) * 100;
+      }
+      return Math.max(0, Math.round(score));
+  };
+
   if (loading) return <div className="text-center py-20">Loading your profile...</div>;
 
   if (existingGoals) {
@@ -140,7 +159,9 @@ export default function EmployeeDashboard() {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {existingGoals.map((g) => (
+          {existingGoals.map((g) => {
+            const score = computeScore(g.actualAchievement, g.target, g.uomType);
+            return (
             <div key={g.id} className="p-6 border border-slate-200 rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
               {g.isShared && <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-black uppercase px-3 py-1 rounded-bl-lg">Mandated KPI</div>}
               
@@ -157,7 +178,14 @@ export default function EmployeeDashboard() {
                 </div>
                 <div>
                     <div className="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Actual Progress</div>
-                    <div className="text-lg font-black text-primary">{g.actualAchievement !== undefined ? g.actualAchievement : '-'}</div>
+                    <div className="text-lg font-black text-primary flex items-center gap-2">
+                        {g.actualAchievement !== undefined ? g.actualAchievement : '-'}
+                        {score !== null && (
+                            <span className={`text-xs px-2 py-0.5 rounded font-black text-white ${score >= 100 ? 'bg-emerald-500' : score >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}>
+                                {score}%
+                            </span>
+                        )}
+                    </div>
                 </div>
               </div>
 
@@ -173,15 +201,19 @@ export default function EmployeeDashboard() {
                       </div>
                   )}
 
-                  {isApproved && !g.isShared && (
-                      <button onClick={() => setUpdateGoalId(g.id)} className="text-primary font-bold text-sm hover:underline">Update Progress →</button>
-                  )}
-                  {isApproved && g.isShared && g.weightage > 0 && (
-                      <button onClick={() => setUpdateGoalId(g.id)} className="text-primary font-bold text-sm hover:underline">Update Progress →</button>
+                  {isApproved && (!g.isShared || g.weightage > 0) && (
+                      <button 
+                          onClick={() => setUpdateGoalId(g.id)} 
+                          disabled={activePhase === 'Goal Setting'}
+                          className="text-primary font-bold text-sm hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                          title={activePhase === 'Goal Setting' ? 'Quarterly check-in is currently locked by the Admin.' : 'Update your progress'}
+                      >
+                          {activePhase === 'Goal Setting' ? 'Locked (Goal Setting Phase)' : 'Update Progress →'}
+                      </button>
                   )}
               </div>
             </div>
-          ))}
+          )})}
         </div>
 
         {/* Update Progress Modal */}
