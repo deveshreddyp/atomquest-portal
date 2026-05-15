@@ -38,6 +38,29 @@ function App() {
     });
   };
 
+  const handleViewGuide = () => {
+    Swal.fire({
+      title: 'AtomQuest Architecture & Flow',
+      html: `
+        <div class="text-left space-y-4 text-sm mt-4 pb-4">
+            <p><strong>1. Admin Layer:</strong> Log in as <code class="bg-slate-100 px-1 rounded font-bold">admin@test.com</code>. Assign employees to managers and toggle the Active Quarter locks in real-time.</p>
+            <p><strong>2. Manager Layer:</strong> Log in as <code class="bg-slate-100 px-1 rounded font-bold">manager@test.com</code>. Accept rosters, approve goal sheets, and push shared KPIs directly to your team.</p>
+            <p><strong>3. Employee Layer:</strong> Log in as <code class="bg-slate-100 px-1 rounded font-bold">employee@test.com</code>. Use the AI Coach to write SMART goals and log actual progress when the Admin unlocks the Quarter.</p>
+        </div>
+      `,
+      imageUrl: '/architecture.png',
+      imageWidth: '100%',
+      imageAlt: 'System Architecture Flow',
+      width: '900px',
+      confirmButtonColor: '#10b981',
+      confirmButtonText: 'Enter Portal'
+    }).then((res) => {
+        if(res.isConfirmed) {
+            window.location.href = '/login';
+        }
+    });
+  };
+
   return (
     <Router>
       <div className="min-h-screen flex flex-col bg-slate-50">
@@ -69,9 +92,14 @@ function App() {
               <div className="text-center py-32">
                 <h2 className="text-5xl font-black mb-6 text-slate-800 tracking-tight leading-tight">Enterprise Goal Tracking.<br/><span className="text-primary">Simplified.</span></h2>
                 <p className="text-slate-500 mb-10 max-w-xl mx-auto text-lg leading-relaxed">A minimalist, AI-powered HR goal tracking platform built for the AtomQuest Hackathon 1.0. Log in to manage your quarterly objectives.</p>
-                <Link to="/login" className="inline-block bg-primary text-white px-10 py-4 rounded-full font-bold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
-                  Access Your Portal
-                </Link>
+                <div className="flex gap-4 justify-center">
+                    <button onClick={handleViewGuide} className="inline-block bg-white border border-slate-200 text-slate-700 px-8 py-4 rounded-full font-bold shadow-sm hover:shadow-md transition-all">
+                      📖 View System Guide
+                    </button>
+                    <Link to="/login" className="inline-block bg-primary text-white px-10 py-4 rounded-full font-bold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
+                      Access Your Portal
+                    </Link>
+                </div>
               </div>
               )
             } />

@@ -31,7 +31,7 @@ graph TD
 - **Progressive Web App (PWA) Support:** Configured with a complete `manifest.json` and Apple web-app meta tags. The portal is fully installable as a standalone native app on mobile devices (iOS/Android), bypassing the browser URL bar for a truly immersive enterprise experience.
 - **Enterprise Governance & Computation:** Strict adherence to BRD requirements. The system automatically computes mathematical progress scores based on UoM (Max vs Min targets). Furthermore, the Admin can toggle "Quarterly Windows" (e.g., Q1, Q2) to physically lock or unlock employee progress updates, preventing out-of-cycle tampering.
 - **AI Integration:** Instead of standard hardcoded placeholders, we integrated **OpenRouter** securely into the frontend. By passing the Thrust Area and Goal Title to the `anthropic/claude-3-haiku` model with a strict system prompt, the AI acts as a digital HR coach, instantly generating concise SMART goals for the employee.
-- **Reporting & Data Visualization:** Used `recharts` for building real-time compliance dashboards (Pie & Bar charts) and `xlsx` (SheetJS) to allow Admins to pull 1-click Excel exports of the entire organization's NoSQL data tree.
+- **Premium Polish:** Replaced all native browser alerts with custom, animated `SweetAlert2` modals. Added an interactive Architecture & User Flow Guide directly to the landing page for judges.
 
 ---
 
