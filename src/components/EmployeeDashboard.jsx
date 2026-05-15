@@ -4,6 +4,7 @@ import { collection, serverTimestamp, writeBatch, doc, query, where, getDocs, up
 import { db } from '../firebase';
 import { useAuthStore } from '../store';
 import { Target, CheckCircle2, AlertCircle } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 export default function EmployeeDashboard() {
   const { user } = useAuthStore();
@@ -49,7 +50,7 @@ export default function EmployeeDashboard() {
   const suggestSMARTGoal = async (index) => {
     const thrustArea = watchGoals[index].thrustArea;
     const title = watchGoals[index].title;
-    if (!title) return alert("Please enter a title first.");
+    if (!title) return Swal.fire('Notification', "Please enter a title first.", 'info');
 
     setIsSuggesting(index);
     try {
@@ -70,15 +71,15 @@ export default function EmployeeDashboard() {
       const data = await response.json();
       setValue(`goals.${index}.description`, data.choices[0].message.content.trim());
     } catch (err) {
-      alert("Failed to fetch AI suggestion.");
+      Swal.fire('Notification', "Failed to fetch AI suggestion.", 'info');
     }
     setIsSuggesting(null);
   };
 
   const onSubmit = async (data) => {
-    if (totalWeightage !== 100) return alert("Total weightage must be exactly 100%. Please adjust.");
-    if (data.goals.length > 8) return alert("Maximum 8 goals allowed.");
-    if (data.goals.some(g => g.weightage < 10)) return alert("Each goal must have a minimum weightage of 10%.");
+    if (totalWeightage !== 100) return Swal.fire('Notification', "Total weightage must be exactly 100%. Please adjust.", 'info');
+    if (data.goals.length > 8) return Swal.fire('Notification', "Maximum 8 goals allowed.", 'info');
+    if (data.goals.some(g => g.weightage < 10)) return Swal.fire('Notification', "Each goal must have a minimum weightage of 10%.", 'info');
     
     try {
       const batch = writeBatch(db);
@@ -95,9 +96,9 @@ export default function EmployeeDashboard() {
       });
       await batch.commit();
       fetchMyGoals();
-      alert("Successfully submitted to Manager for approval!");
+      Swal.fire('Notification', "Successfully submitted to Manager for approval!", 'info');
     } catch (err) {
-        alert("Error saving: " + err.message);
+        Swal.fire('Notification', "Error saving: " + err.message, 'info');
     }
   };
 
@@ -109,11 +110,11 @@ export default function EmployeeDashboard() {
             progressStatus: progStatus,
             lastUpdated: serverTimestamp()
         });
-        alert("Progress Updated!");
+        Swal.fire('Notification', "Progress Updated!", 'info');
         setUpdateGoalId(null); setActualVal(''); setProgStatus('On Track');
         fetchMyGoals();
     } catch (err) {
-        alert("Failed to update progress.");
+        Swal.fire('Notification', "Failed to update progress.", 'info');
     }
   };
 
@@ -122,7 +123,7 @@ export default function EmployeeDashboard() {
       try {
           await updateDoc(doc(db, 'goals', goalId), { weightage: Number(newWeight), status: 'pending' });
           fetchMyGoals();
-      } catch (err) { alert("Failed to update weight."); }
+      } catch (err) { Swal.fire('Notification', "Failed to update weight.", 'info'); }
   };
 
   const computeScore = (actual, target, uom) => {

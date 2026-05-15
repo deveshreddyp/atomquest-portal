@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-ro
 import { signOut } from 'firebase/auth';
 import { auth } from './firebase';
 import { useAuthStore } from './store';
+import Swal from 'sweetalert2';
 import Login from './components/Login';
 import EmployeeDashboard from './components/EmployeeDashboard';
 import ManagerDashboard from './components/ManagerDashboard';
@@ -19,13 +20,22 @@ function App() {
   const { user, role, logout } = useAuthStore();
 
   const handleLogout = () => {
-    if (window.confirm("Are you sure you want to log out of the AtomQuest portal?")) {
-      signOut(auth).then(() => {
-        logout();
-        // Replace current URL in history stack so 'back' button doesn't trap them
-        window.location.replace('/login');
-      });
-    }
+    Swal.fire({
+      title: 'Logout',
+      text: "Are you sure you want to log out of the AtomQuest portal?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#10b981',
+      cancelButtonColor: '#ef4444',
+      confirmButtonText: 'Yes, log out!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        signOut(auth).then(() => {
+          logout();
+          window.location.replace('/login');
+        });
+      }
+    });
   };
 
   return (

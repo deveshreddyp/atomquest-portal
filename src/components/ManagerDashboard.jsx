@@ -1,3 +1,4 @@
+import Swal from 'sweetalert2';
 import React, { useEffect, useState } from 'react';
 import { collection, query, where, getDocs, writeBatch, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -55,7 +56,7 @@ export default function ManagerDashboard() {
         await updateDoc(doc(db, 'allocations', reqId), { status });
         fetchDashboardData();
     } catch (err) {
-        alert("Error updating request.");
+        Swal.fire('Notification', "Error updating request.", 'info');
     }
   };
 
@@ -74,17 +75,17 @@ export default function ManagerDashboard() {
         });
       });
       await batch.commit();
-      alert("Goals approved and locked!");
+      Swal.fire('Notification', "Goals approved and locked!", 'info');
       fetchDashboardData();
     } catch (err) {
-      alert("Error approving: " + err.message);
+      Swal.fire('Notification', "Error approving: " + err.message, 'info');
     }
   };
 
   const handlePushSharedGoal = async (e) => {
     e.preventDefault();
     const acceptedEmails = requests.filter(r => r.status === 'accepted').map(r => r.employeeEmail);
-    if(acceptedEmails.length === 0) return alert("You have no accepted employees to push goals to.");
+    if(acceptedEmails.length === 0) return Swal.fire('Notification', "You have no accepted employees to push goals to.", 'info');
 
     try {
         const batch = writeBatch(db);
@@ -106,10 +107,10 @@ export default function ManagerDashboard() {
         });
         await batch.commit();
         setSgTitle(''); setSgTarget('');
-        alert(`Successfully pushed shared goal to ${acceptedEmails.length} team members!`);
+        Swal.fire('Notification', `Successfully pushed shared goal to ${acceptedEmails.length} team members!`, 'info');
         fetchDashboardData();
     } catch(err) {
-        alert("Error pushing goal: " + err.message);
+        Swal.fire('Notification', "Error pushing goal: " + err.message, 'info');
     }
   };
 

@@ -4,6 +4,7 @@ import { db } from '../firebase';
 import * as XLSX from 'xlsx';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import { Users, FileDown, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 export default function AdminDashboard() {
   const [goals, setGoals] = useState([]);
@@ -55,10 +56,10 @@ export default function AdminDashboard() {
         });
         setEmpEmail('');
         setMgrEmail('');
-        alert("Allocation Request sent to Manager!");
+        Swal.fire('Success', 'Allocation Request sent to Manager!', 'success');
         fetchData();
     } catch (err) {
-        alert("Error allocating: " + err.message);
+        Swal.fire('Error', "Error allocating: " + err.message, 'error');
     }
   };
 
@@ -66,9 +67,9 @@ export default function AdminDashboard() {
     setActivePhase(newPhase);
     try {
         await setDoc(doc(db, 'settings', 'system'), { activePhase: newPhase }, { merge: true });
-        alert(`System Phase successfully updated to: ${newPhase}`);
+        Swal.fire('Success', `System Phase successfully updated to: ${newPhase}`, 'success');
     } catch (err) {
-        alert("Error updating phase: " + err.message);
+        Swal.fire('Error', "Error updating phase: " + err.message, 'error');
     }
   };
 
