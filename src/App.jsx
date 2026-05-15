@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
-import { signOut } from 'firebase/auth';
+import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase';
 import { useAuthStore } from './store';
 import Swal from 'sweetalert2';
@@ -17,7 +17,23 @@ function ProtectedRoute({ children, allowedRole }) {
 }
 
 function App() {
-  const { user, role, logout } = useAuthStore();
+  const { user, role, logout, setAuth } = useAuthStore();
+  const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        let currentRole = 'employee';
+        if (currentUser.email.includes('manager')) currentRole = 'manager';
+        if (currentUser.email.includes('admin')) currentRole = 'admin';
+        setAuth(currentUser, currentRole);
+      } else {
+        logout();
+      }
+      setAuthLoading(false);
+    });
+    return () => unsubscribe();
+  }, [setAuth, logout]);
 
   const handleLogout = () => {
     Swal.fire({
@@ -32,7 +48,7 @@ function App() {
       if (result.isConfirmed) {
         signOut(auth).then(() => {
           logout();
-          window.location.replace('/login');
+          window.location.replace('/');
         });
       }
     });
@@ -60,6 +76,8 @@ function App() {
         }
     });
   };
+
+  if (authLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-50"><div className="text-slate-500 font-bold">Verifying Session...</div></div>;
 
   return (
     <Router>
