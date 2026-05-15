@@ -38,7 +38,7 @@ export default function Login() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[60vh]">
+    <div className="flex flex-col items-center justify-center min-h-[70vh]">
       <div className="bg-white p-10 rounded-2xl shadow-xl border border-border w-full max-w-md">
         <div className="text-center mb-8">
             <h2 className="text-3xl font-black text-slate-800">Welcome Back</h2>
@@ -57,6 +57,15 @@ export default function Login() {
             {loading ? "Authenticating..." : "Access Portal"}
           </button>
         </form>
+      </div>
+
+      <div className="mt-8 text-center text-xs font-medium text-slate-500 space-y-1">
+        <p>AtomQuest Hackathon © 2026</p>
+        <div className="flex gap-4 justify-center">
+            <a href="#" onClick={(e) => { e.preventDefault(); alert("Privacy Policy: All data is securely stored in Firebase and used strictly for Hackathon evaluation purposes."); }} className="hover:text-primary transition-colors">Privacy Policy</a>
+            <span>|</span>
+            <a href="#" onClick={(e) => { e.preventDefault(); alert("Terms of Service: Authorized personnel only."); }} className="hover:text-primary transition-colors">Terms of Service</a>
+        </div>
       </div>
     </div>
   );
