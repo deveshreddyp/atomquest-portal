@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { signOut } from 'firebase/auth';
+import { auth } from './firebase';
 import { useAuthStore } from './store';
 import Login from './components/Login';
 import EmployeeDashboard from './components/EmployeeDashboard';
@@ -16,6 +18,16 @@ function ProtectedRoute({ children, allowedRole }) {
 function App() {
   const { user, role, logout } = useAuthStore();
 
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to log out of the AtomQuest portal?")) {
+      signOut(auth).then(() => {
+        logout();
+        // Replace current URL in history stack so 'back' button doesn't trap them
+        window.location.replace('/login');
+      });
+    }
+  };
+
   return (
     <Router>
       <div className="min-h-screen flex flex-col bg-slate-50">
@@ -31,7 +43,7 @@ function App() {
                   {role === 'employee' && <Link to="/employee" className="text-slate-600 hover:text-primary transition-colors">Goal Sheet</Link>}
                   {role === 'manager' && <Link to="/manager" className="text-slate-600 hover:text-primary transition-colors">Manager Dashboard</Link>}
                   {role === 'admin' && <Link to="/admin" className="text-slate-600 hover:text-primary transition-colors">Admin Panel</Link>}
-                  <button onClick={logout} className="text-slate-500 hover:text-red-600 ml-2 font-bold transition-colors">Logout</button>
+                  <button onClick={handleLogout} className="text-slate-500 hover:text-red-600 ml-2 font-bold transition-colors">Logout</button>
                 </>
               ) : (
                 <Link to="/login" className="bg-slate-900 text-white px-5 py-2.5 rounded-lg hover:bg-slate-800 transition-colors shadow-sm">Sign In</Link>
