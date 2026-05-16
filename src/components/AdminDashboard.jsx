@@ -3,7 +3,7 @@ import { collection, getDocs, query, orderBy, addDoc, serverTimestamp, doc, getD
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { db, secondaryApp } from '../firebase';
 import * as XLSX from 'xlsx';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import { Users, FileDown, AlertCircle, CheckCircle, Clock, ShieldCheck, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { useAuthStore } from '../store';
@@ -378,34 +378,26 @@ export default function AdminDashboard() {
 
       {/* Analytics Module */}
       <div className="grid grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
-          <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4">Goal Distribution by Thrust Area</h3>
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
-              <PieChart>
-                <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                  {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col items-center">
+          <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4 w-full text-left">Goal Distribution by Thrust Area</h3>
+          <PieChart width={400} height={250}>
+            <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+              {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+            </Pie>
+            <Tooltip />
+            <Legend />
+          </PieChart>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
-          <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4">Approval Completion Rate</h3>
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
-              <BarChart data={statusData} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                <XAxis type="number" />
-                <YAxis dataKey="name" type="category" width={120} />
-                <Tooltip />
-                <Bar dataKey="value" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col items-center">
+          <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4 w-full text-left">Approval Completion Rate</h3>
+          <BarChart width={400} height={250} data={statusData} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+            <XAxis type="number" />
+            <YAxis dataKey="name" type="category" width={120} />
+            <Tooltip />
+            <Bar dataKey="value" radius={[0, 4, 4, 0]} />
+          </BarChart>
         </div>
       </div>
     </div>
