@@ -101,7 +101,7 @@ function App() {
       <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
         <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sticky top-0 z-10 shadow-sm">
           <div className="max-w-6xl mx-auto flex justify-between items-center">
-            <Link to="/" className="text-2xl font-black tracking-tight text-slate-800 dark:text-white flex items-center gap-3">
+            <Link to="/" className="text-2xl font-black tracking-tight text-slate-800 dark:text-white flex items-center gap-3 hover:scale-105 transition-transform duration-300">
               <AtombergLogo className="h-10 w-auto" />
               <div className="flex items-baseline gap-1">
                  AtomQuest <span className="text-yellow-600 dark:text-yellow-400 text-lg font-bold">Portal</span>
@@ -131,7 +131,7 @@ function App() {
             <Route path="/" element={
               user ? <Navigate to={`/${role}`} /> : (
               <div className="text-center py-32 animate-fade-in-up">
-                <div className="flex justify-center mb-8">
+                <div className="flex justify-center mb-8 hover:scale-110 transition-transform duration-500 cursor-default">
                     <AtombergLogo className="h-28 w-auto" />
                 </div>
                 <h2 className="text-5xl font-black mb-6 text-slate-800 dark:text-white tracking-tight leading-tight animate-fade-in-up delay-100">Enterprise Goal Tracking.<br/><span className="text-yellow-600 dark:text-yellow-400">Simplified.</span></h2>
