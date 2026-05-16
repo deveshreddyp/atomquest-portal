@@ -11,34 +11,41 @@
 ## 3. Architecture Flow Diagram
 ```mermaid
 graph TD
-    A[Employee / Manager] -->|Auth via Firebase| B(React Frontend)
-    B -->|State Mgmt| C{Zustand Store}
-    C -->|Goal Submission & Validation| D[(Firestore NoSQL DB)]
-    B -->|Click 'Generate AI'| E[OpenRouter API]
-    E -->|Anthropic Claude-3| B
-    D -->|Real-time sync| F[Admin Dashboard Analytics]
-    F -->|Export Data| G[SheetJS .xlsx]
+    A[Admin Dashboard] -->|User Provisioning| B[(System Directory)]
+    A -->|Roster Allocation| C[(Allocations DB)]
+    D[Employee / Manager] -->|Auth Check| B
+    D -->|Goal Submission & Review| E[(Goals DB)]
+    E -->|Real-time sync| F[Manager Dashboard]
+    E -->|Analytics| A
+    D -->|AI Evaluation| G[OpenRouter Claude-3 API]
+    A -->|Immutable Trail| H[(Audit Logs)]
 ```
 
 ---
 
 ## 🏗️ Technology Stack & Backend Approach
-- **Frontend Layer:** React 18 with Vite for blazing-fast local development and HMR. We utilized **Tailwind CSS V4** and **Lucide React** to build a strict, monochromatic, "Enterprise-Grade" minimalist user interface that remains highly legible and performant. State is managed globally via **Zustand**, allowing seamless role-based routing (`/employee`, `/manager`, `/admin`).
-- **Backend Infrastructure (BaaS):** We adopted a fully serverless approach using **Firebase**.
-  - **Firebase Auth:** Handles secure session creation.
-  - **Firestore Database (NoSQL):** Powers the core logic. We utilized *Firestore Batch Writes* (`writeBatch`) to ensure atomicity when submitting up to 8 goals at once. Global system states (e.g., active Quarterly Check-In phases) are handled via centralized Firestore documents to lock/unlock UI interactions in real-time.
-  - **Firebase Hosting:** Provides a global CDN ensuring lightning-fast load times for the portal, with an automated CI/CD-style build script for updates.
+- **Frontend Layer:** Built on **React 18** with **Vite** for blazing-fast HMR. The UI is built entirely with **Tailwind CSS V4** and **Lucide React** to create a strict, monochromatic, "Enterprise-Grade" user interface. State routing is handled by **Zustand** for seamless Role-Based Access Control (`/employee`, `/manager`, `/admin`). Analytics visualizations powered by **Recharts**.
+- **Backend Infrastructure (BaaS):** Fully serverless architecture powered by **Firebase**.
+  - **Firebase Auth:** Handles secure user authentication sessions.
+  - **Firestore Database (NoSQL):** Powers the core relational logic between Employees, Managers, and Goals. Implements *Firestore Batch Writes* (`writeBatch`) to ensure atomicity. **Firestore Security Rules** are deployed to strictly lock down sensitive collections (e.g., only Admins can read/write to `system_users`).
+  - **Firebase Hosting:** Global CDN ensuring lightning-fast load times.
 
-## 🚀 Hackathon Winning Features
-1. **Manager-Employee Feedback Loop:** A complete interactive workflow where Managers can "Reject & Comment" on individual goals. Employees receive immediate alerts on their dashboard, view the Manager's required changes, and can edit and resubmit their targets directly.
-2. **Immutable System Audit Logs:** Every critical action (roster allocations, goal approvals, AI usages, feedback submissions) is strictly recorded in a tamper-proof timeline visible to Admins.
-3. **AI Integration (Claude-3):** Integrated OpenRouter securely. Employees receive instant, AI-generated SMART goals. Managers can click "✨ AI Insight" to generate instant, professional performance summaries of their team members based on their targets and achievements.
-4. **Push Shared KPIs:** Managers can create overarching departmental goals and force-push them onto the active goal sheets of their entire roster simultaneously.
-5. **Progressive Web App (PWA):** Configured with a complete `manifest.json` and Apple web-app meta tags. The portal is fully installable as a standalone native app on mobile devices (iOS/Android), bypassing the browser URL bar.
+## 🚀 Key Hackathon Features & Strengths
+1. **Identity & Roster Management:** Complete lifecycle management from the Admin Dashboard. Admins can provision new users, assign roles (Admin/Manager/Employee), and seamlessly link Employees to their respective Managers. Includes strict server-side validation to prevent self-allocations or assigning unregistered users.
+2. **Immutable System Audit Logs:** Every critical action (roster allocations, allocation deletions, phase changes, goal approvals) is strictly recorded in a tamper-proof timeline visible only to the Admin, ensuring enterprise-level compliance and transparency.
+3. **Manager-Employee Feedback Loop:** An interactive workflow where Managers can "Reject & Comment" on individual goals. Employees receive immediate alerts on their dashboard with the required changes and can resubmit their targets directly.
+4. **AI Integration (Claude-3):** Deeply integrated OpenRouter API. Employees can generate SMART goals instantly. Managers can utilize "✨ AI Insight" to generate instant, professional performance summaries of their team members based on their targets and achievements.
+5. **Push Shared KPIs:** Managers can create overarching departmental goals and force-push them onto the active goal sheets of their entire roster simultaneously.
 6. **Enterprise Utilities:** 
    - **PDF Export:** Employees can export their approved goal sheets directly to a print-ready PDF using `html2pdf.js`.
-   - **Excel Export:** Admins can export system rosters using `SheetJS`.
-7. **Premium Atomberg Branding:** Official high-resolution transparent wordmarks, custom Favicons, Atomberg Yellow `#FDB913` core themes, and sleek micro-interactions (`hover:scale`) integrated throughout.
+   - **Excel Export:** Admins can export system rosters and goal data using `SheetJS`.
+7. **Premium Atomberg Branding:** Official high-resolution transparent wordmarks, custom Favicons, Atomberg Yellow `#FDB913` core themes, and sleek micro-interactions built for a premium feel.
+
+## ⚠️ Architecture Roadmap (Future Enterprise Scaling)
+While the current portal is highly robust for an MVP, an enterprise-scale rollout would require the following architectural evolutions:
+- **Zero-Trust Role Security:** Migrating role-verification from Firestore Documents to **Firebase Auth Custom Claims** (`admin: true`) via Cloud Functions to completely prevent frontend spoofing.
+- **Backend Analytics Aggregation:** Currently, Admin Analytics fetch raw goal documents to render charts. At 10,000+ employees, this would hit Firestore read limits. Future state requires nightly scheduled Cloud Functions to aggregate data into a single `analytics_summary` document.
+- **WebSocket Subscriptions:** Upgrading explicit `fetch()` requests on the Manager dashboard to `onSnapshot()` listeners for instantaneous, real-time sync across all active sessions.
 
 ---
 
