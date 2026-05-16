@@ -9,9 +9,10 @@ import Login from './components/Login';
 import EmployeeDashboard from './components/EmployeeDashboard';
 import ManagerDashboard from './components/ManagerDashboard';
 import AdminDashboard from './components/AdminDashboard';
+import atombergLogo from './assets/atomberg-logo.png';
 
 export const AtombergLogo = ({ className = "w-8 h-8" }) => (
-  <img src="/atomberg-logo.png" alt="Atomberg Logo" className={`${className} object-contain`} />
+  <img src={atombergLogo} alt="Atomberg Logo" className={`${className} object-contain`} />
 );
 
 function ProtectedRoute({ children, allowedRole }) {
