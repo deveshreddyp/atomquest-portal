@@ -104,7 +104,7 @@ function App() {
             <Link to="/" className="text-2xl font-black tracking-tight text-slate-800 dark:text-white flex items-center gap-3">
               <AtombergLogo className="h-10 w-auto" />
               <div className="flex items-baseline gap-1">
-                 AtomQuest <span className="text-primary text-lg font-bold">Portal</span>
+                 AtomQuest <span className="text-yellow-600 dark:text-yellow-400 text-lg font-bold">Portal</span>
               </div>
             </Link>
             <nav className="space-x-6 text-sm font-semibold flex items-center">
@@ -114,9 +114,9 @@ function App() {
               {user ? (
                 <>
                   <span className="text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">Role: <span className="text-slate-800 dark:text-white uppercase">{role}</span></span>
-                  {role === 'employee' && <Link to="/employee" className="text-slate-600 hover:text-primary transition-colors">Goal Sheet</Link>}
-                  {role === 'manager' && <Link to="/manager" className="text-slate-600 hover:text-primary transition-colors">Manager Dashboard</Link>}
-                  {role === 'admin' && <Link to="/admin" className="text-slate-600 hover:text-primary transition-colors">Admin Panel</Link>}
+                  {role === 'employee' && <Link to="/employee" className="text-slate-600 hover:text-yellow-600 dark:text-yellow-400 transition-colors">Goal Sheet</Link>}
+                  {role === 'manager' && <Link to="/manager" className="text-slate-600 hover:text-yellow-600 dark:text-yellow-400 transition-colors">Manager Dashboard</Link>}
+                  {role === 'admin' && <Link to="/admin" className="text-slate-600 hover:text-yellow-600 dark:text-yellow-400 transition-colors">Admin Panel</Link>}
                   <button onClick={handleLogout} className="text-slate-500 dark:text-slate-400 hover:text-red-600 ml-2 font-bold transition-colors">Logout</button>
                 </>
               ) : (
@@ -134,13 +134,13 @@ function App() {
                 <div className="flex justify-center mb-8">
                     <AtombergLogo className="h-28 w-auto" />
                 </div>
-                <h2 className="text-5xl font-black mb-6 text-slate-800 dark:text-white tracking-tight leading-tight animate-fade-in-up delay-100">Enterprise Goal Tracking.<br/><span className="text-primary">Simplified.</span></h2>
+                <h2 className="text-5xl font-black mb-6 text-slate-800 dark:text-white tracking-tight leading-tight animate-fade-in-up delay-100">Enterprise Goal Tracking.<br/><span className="text-yellow-600 dark:text-yellow-400">Simplified.</span></h2>
                 <p className="text-slate-500 dark:text-slate-400 mb-10 max-w-xl mx-auto text-lg leading-relaxed animate-fade-in-up delay-200">A minimalist, AI-powered HR goal tracking platform built for the Atomberg Hackathon. Log in to manage your quarterly objectives.</p>
                 <div className="flex gap-4 justify-center animate-fade-in-up delay-200">
                     <button onClick={handleViewGuide} className="inline-block bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 px-8 py-4 rounded-full font-bold shadow-sm hover:shadow-md transition-all">
                       📖 View System Guide
                     </button>
-                    <Link to="/login" className="inline-block bg-primary text-white px-10 py-4 rounded-full font-bold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
+                    <Link to="/login" className="inline-block bg-primary text-slate-900 px-10 py-4 rounded-full font-bold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
                       Access Your Portal
                     </Link>
                 </div>

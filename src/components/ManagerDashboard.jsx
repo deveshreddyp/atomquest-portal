@@ -191,7 +191,7 @@ export default function ManagerDashboard() {
                             <button onClick={()=>handleRequest(req.id, 'conflict')} className="flex items-center gap-1 px-4 py-2 text-red-600 bg-red-50 hover:bg-red-100 font-bold rounded-lg transition-colors">
                                 <XCircle size={18}/> Reject (Conflict)
                             </button>
-                            <button onClick={()=>handleRequest(req.id, 'accepted')} className="flex items-center gap-1 px-4 py-2 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 font-bold rounded-lg transition-colors">
+                            <button onClick={()=>handleRequest(req.id, 'accepted')} className="flex items-center gap-1 px-4 py-2 text-emerald-600 bg-emerald-50 hover:brightness-110 font-bold rounded-lg transition-colors">
                                 <CheckCircle2 size={18}/> Accept to Team
                             </button>
                         </div>
@@ -204,7 +204,7 @@ export default function ManagerDashboard() {
       <div className="grid grid-cols-3 gap-8">
         {/* Shared Goal Pusher */}
         <div className="col-span-1 bg-slate-900 rounded-2xl shadow-lg p-6 text-white h-max sticky top-6">
-            <h3 className="font-black text-xl mb-2 flex items-center gap-2"><Send size={20} className="text-primary"/> Push Shared Goal</h3>
+            <h3 className="font-black text-xl mb-2 flex items-center gap-2"><Send size={20} className="text-yellow-600 dark:text-yellow-400"/> Push Shared Goal</h3>
             <p className="text-slate-400 text-sm mb-6">Force a departmental KPI onto all your accepted team members' sheets.</p>
             
             <form onSubmit={handlePushSharedGoal} className="space-y-4">
@@ -233,7 +233,7 @@ export default function ManagerDashboard() {
                         <input type="number" value={sgTarget} onChange={e=>setSgTarget(e.target.value)} required className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white outline-none focus:border-primary" />
                     </div>
                 </div>
-                <button type="submit" className="w-full bg-primary text-slate-900 font-black py-3 rounded-lg hover:bg-emerald-400 transition-colors mt-2">
+                <button type="submit" className="w-full bg-primary text-slate-900 font-black py-3 rounded-lg hover:brightness-110 transition-colors mt-2">
                     Push to Entire Team
                 </button>
             </form>
@@ -263,7 +263,7 @@ export default function ManagerDashboard() {
                                     <Sparkles size={14}/> AI Insight
                                   </button>
                                   {hasPending ? (
-                                      <button onClick={() => handleApproveAll(empEmail)} className="bg-primary text-white font-bold py-2 px-5 rounded-lg hover:bg-emerald-600 transition-colors shadow-sm text-sm">
+                                      <button onClick={() => handleApproveAll(empEmail)} className="bg-primary text-slate-900 font-bold py-2 px-5 rounded-lg hover:brightness-110 transition-colors shadow-sm text-sm">
                                           Approve Pending
                                       </button>
                                   ) : (
@@ -291,7 +291,7 @@ export default function ManagerDashboard() {
                                             <span className="text-slate-700 dark:text-slate-200 font-medium">{g.title}</span>
                                         </td>
                                         <td className="px-6 py-4 text-slate-800 dark:text-white font-bold text-right">{g.target} {g.uomType}</td>
-                                        <td className="px-6 py-4 text-primary font-black text-right flex justify-end items-center gap-2">
+                                        <td className="px-6 py-4 text-yellow-600 dark:text-yellow-400 font-black text-right flex justify-end items-center gap-2">
                                             {g.actualAchievement || '-'}
                                             {score !== null && (
                                                 <span className={`text-xs px-2 py-0.5 rounded font-black text-white ${score >= 100 ? 'bg-emerald-500' : score >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}>

@@ -3,7 +3,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-primary: #10b981;
+  --color-primary: #FDB913;
   --color-background: #ffffff;
   --color-foreground: #0f172a;
   --color-muted: #f1f5f9;
@@ -12,8 +12,8 @@
 
 @layer base {
   ::selection {
-    background-color: #10b981; /* primary emerald */
-    color: white;
+    background-color: #FDB913; /* Atomberg Yellow */
+    color: #000000;
   }
 
   ::-webkit-scrollbar {

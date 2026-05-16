@@ -142,7 +142,7 @@ export default function AdminDashboard() {
       {/* Roster Allocation Module */}
       <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
         <h3 className="font-black text-xl text-slate-800 dark:text-white flex items-center gap-2 mb-6">
-            <Users className="text-primary" /> Roster Management & Allocations
+            <Users className="text-yellow-600 dark:text-yellow-400" /> Roster Management & Allocations
         </h3>
         
         <div className="grid grid-cols-3 gap-8">
@@ -157,7 +157,7 @@ export default function AdminDashboard() {
                         <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Manager Email</label>
                         <input type="email" value={mgrEmail} onChange={e=>setMgrEmail(e.target.value)} required className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 bg-white dark:bg-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="manager@test.com" />
                     </div>
-                    <button type="submit" className="w-full bg-primary text-white font-bold py-2.5 rounded-lg hover:bg-emerald-600 transition-colors">
+                    <button type="submit" className="w-full bg-primary text-slate-900 font-bold py-2.5 rounded-lg hover:brightness-110 transition-colors">
                         Send Allocation Request
                     </button>
                 </form>
@@ -199,7 +199,7 @@ export default function AdminDashboard() {
       {/* Audit Log Module */}
       <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
         <h3 className="font-black text-xl text-slate-800 dark:text-white flex items-center gap-2 mb-6">
-            <ShieldCheck className="text-primary" /> System Audit Logs
+            <ShieldCheck className="text-yellow-600 dark:text-yellow-400" /> System Audit Logs
         </h3>
         <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden h-48 overflow-y-auto p-4">
             {auditLogs.length === 0 ? <p className="text-slate-500 dark:text-slate-400 text-center mt-10">No audit logs available.</p> : (

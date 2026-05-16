@@ -65,9 +65,9 @@ export default function Login() {
       <div className="mt-8 text-center text-xs font-medium text-slate-500 dark:text-slate-400 space-y-1">
         <p>AtomQuest Hackathon © 2026</p>
         <div className="flex gap-4 justify-center">
-            <a href="#" onClick={(e) => { e.preventDefault(); Swal.fire('Privacy Policy', 'All data is securely stored in Firebase and used strictly for Hackathon evaluation purposes.', 'info'); }} className="hover:text-primary transition-colors">Privacy Policy</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); Swal.fire('Privacy Policy', 'All data is securely stored in Firebase and used strictly for Hackathon evaluation purposes.', 'info'); }} className="hover:text-yellow-600 dark:text-yellow-400 transition-colors">Privacy Policy</a>
             <span>|</span>
-            <a href="#" onClick={(e) => { e.preventDefault(); Swal.fire('Terms of Service', 'Authorized personnel only.', 'info'); }} className="hover:text-primary transition-colors">Terms of Service</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); Swal.fire('Terms of Service', 'Authorized personnel only.', 'info'); }} className="hover:text-yellow-600 dark:text-yellow-400 transition-colors">Terms of Service</a>
         </div>
       </div>
     </div>

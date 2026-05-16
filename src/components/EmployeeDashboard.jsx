@@ -187,7 +187,7 @@ export default function EmployeeDashboard() {
               {g.isShared && <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-black uppercase px-3 py-1 rounded-bl-lg">Mandated KPI</div>}
               
               <div className="mb-4 pr-12">
-                <span className="text-xs font-bold uppercase tracking-wider text-primary mb-1 block">{g.thrustArea}</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-yellow-600 dark:text-yellow-400 mb-1 block">{g.thrustArea}</span>
                 <h4 className="font-bold text-slate-800 dark:text-white text-lg">{g.title}</h4>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 line-clamp-2">{g.description}</p>
               </div>
@@ -199,7 +199,7 @@ export default function EmployeeDashboard() {
                 </div>
                 <div>
                     <div className="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Actual Progress</div>
-                    <div className="text-lg font-black text-primary flex items-center gap-2">
+                    <div className="text-lg font-black text-yellow-600 dark:text-yellow-400 flex items-center gap-2">
                         {g.actualAchievement !== undefined ? g.actualAchievement : '-'}
                         {score !== null && (
                             <span className={`text-xs px-2 py-0.5 rounded font-black text-white ${score >= 100 ? 'bg-emerald-500' : score >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}>
@@ -214,7 +214,7 @@ export default function EmployeeDashboard() {
                   {g.isShared && g.weightage === 0 ? (
                       <div className="flex gap-2 w-full">
                           <input type="number" placeholder="Set Weight %" id={`weight-${g.id}`} className="w-full border rounded-lg p-2 text-sm" />
-                          <button onClick={()=>handleSetSharedWeight(g.id, document.getElementById(`weight-${g.id}`).value)} className="bg-primary text-white text-sm font-bold px-4 rounded-lg">Save</button>
+                          <button onClick={()=>handleSetSharedWeight(g.id, document.getElementById(`weight-${g.id}`).value)} className="bg-primary text-slate-900 text-sm font-bold px-4 rounded-lg">Save</button>
                       </div>
                   ) : (
                       <div className="text-sm font-black text-slate-800 dark:text-white bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800">
@@ -226,7 +226,7 @@ export default function EmployeeDashboard() {
                       <button 
                           onClick={() => setUpdateGoalId(g.id)} 
                           disabled={activePhase === 'Goal Setting'}
-                          className="text-primary font-bold text-sm hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="text-yellow-600 dark:text-yellow-400 font-bold text-sm hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
                           title={activePhase === 'Goal Setting' ? 'Quarterly check-in is currently locked by the Admin.' : 'Update your progress'}
                       >
                           {activePhase === 'Goal Setting' ? 'Locked (Goal Setting Phase)' : 'Update Progress →'}
@@ -258,7 +258,7 @@ export default function EmployeeDashboard() {
                         </div>
                         <div className="flex gap-3 mt-6 pt-6 border-t border-slate-100">
                             <button type="button" onClick={()=>setUpdateGoalId(null)} className="w-full bg-slate-100 dark:bg-slate-800 text-slate-600 font-bold py-3 rounded-lg hover:bg-slate-200">Cancel</button>
-                            <button type="submit" className="w-full bg-primary text-white font-bold py-3 rounded-lg hover:bg-emerald-600">Save Progress</button>
+                            <button type="submit" className="w-full bg-primary text-slate-900 font-bold py-3 rounded-lg hover:brightness-110">Save Progress</button>
                         </div>
                     </form>
                 </div>
@@ -309,7 +309,7 @@ export default function EmployeeDashboard() {
             <div>
               <div className="flex justify-between items-center mb-1.5">
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">SMART Description</label>
-                <button type="button" onClick={() => suggestSMARTGoal(index)} disabled={isSuggesting === index} className="text-primary text-sm font-bold flex items-center gap-1.5 hover:opacity-80 transition-opacity bg-emerald-50 px-3 py-1 rounded-md">
+                <button type="button" onClick={() => suggestSMARTGoal(index)} disabled={isSuggesting === index} className="text-yellow-600 dark:text-yellow-400 text-sm font-bold flex items-center gap-1.5 hover:opacity-80 transition-opacity bg-emerald-50 px-3 py-1 rounded-md">
                   ✨ {isSuggesting === index ? "Generating..." : "Generate AI Description"}
                 </button>
               </div>
