@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, query, orderBy, addDoc, serverTimestamp, doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, addDoc, serverTimestamp, doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { db, secondaryApp } from '../firebase';
 import * as XLSX from 'xlsx';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
-import { Users, FileDown, AlertCircle, CheckCircle, Clock, ShieldCheck } from 'lucide-react';
+import { Users, FileDown, AlertCircle, CheckCircle, Clock, ShieldCheck, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { useAuthStore } from '../store';
 import { logAuditAction } from '../utils';
@@ -146,6 +146,27 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDeleteAllocation = async (allocationId, employee, manager) => {
+    const result = await Swal.fire({
+      title: 'Delete Allocation?',
+      text: `Are you sure you want to remove the allocation for ${employee}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteDoc(doc(db, 'allocations', allocationId));
+        await logAuditAction(user.email, 'DELETE_ALLOCATION', `Deleted allocation: ${employee} -> ${manager}`);
+        Swal.fire('Deleted!', 'The allocation has been removed.', 'success');
+        fetchData();
+      } catch (err) {
+        Swal.fire('Error', "Failed to delete allocation: " + err.message, 'error');
+      }
+    }
+  };
+
   const handleUpdatePhase = async (newPhase) => {
     setActivePhase(newPhase);
     try {
@@ -272,6 +293,7 @@ export default function AdminDashboard() {
                             <th className="px-6 py-3 font-semibold">Status</th>
                             <th className="px-6 py-3 font-semibold">Employee</th>
                             <th className="px-6 py-3 font-semibold">Assigned Manager</th>
+                            <th className="px-6 py-3 font-semibold text-right">Actions</th>
                         </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -284,10 +306,15 @@ export default function AdminDashboard() {
                                     </td>
                                     <td className="px-6 py-3 font-medium text-slate-800 dark:text-white">{a.employeeEmail}</td>
                                     <td className="px-6 py-3 text-slate-600">{a.managerEmail}</td>
+                                    <td className="px-6 py-3 text-right">
+                                        <button onClick={() => handleDeleteAllocation(a.id, a.employeeEmail, a.managerEmail)} className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-md transition-colors" title="Delete Allocation">
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </td>
                                 </tr>
                             ))}
                             {allocations.length === 0 && (
-                                <tr><td colSpan="3" className="px-6 py-8 text-center text-slate-500 dark:text-slate-400">No roster allocations created yet.</td></tr>
+                                <tr><td colSpan="4" className="px-6 py-8 text-center text-slate-500 dark:text-slate-400">No roster allocations created yet.</td></tr>
                             )}
                         </tbody>
                     </table>
