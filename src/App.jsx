@@ -12,7 +12,7 @@ import AdminDashboard from './components/AdminDashboard';
 import atombergLogo from './assets/atomberg-logo.png';
 
 export const AtombergLogo = ({ className = "h-8 w-auto" }) => (
-  <img src={atombergLogo} alt="Atomberg Logo" className={`${className} object-contain mix-blend-multiply dark:mix-blend-normal dark:bg-white dark:p-1 dark:rounded-md`} />
+  <img src={atombergLogo} alt="Atomberg Logo" className={`${className} object-contain dark:bg-slate-100 dark:p-2 dark:rounded-xl`} />
 );
 
 function ProtectedRoute({ children, allowedRole }) {
