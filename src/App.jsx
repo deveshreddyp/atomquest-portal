@@ -11,10 +11,7 @@ import ManagerDashboard from './components/ManagerDashboard';
 import AdminDashboard from './components/AdminDashboard';
 
 export const AtombergLogo = ({ className = "w-8 h-8" }) => (
-  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-    <path d="M50 10L15 90H35L50 50L65 90H85L50 10Z" fill="currentColor"/>
-    <circle cx="50" cy="70" r="10" fill="#10b981"/>
-  </svg>
+  <img src="/atomberg-logo.png" alt="Atomberg Logo" className={`${className} object-contain`} />
 );
 
 function ProtectedRoute({ children, allowedRole }) {
