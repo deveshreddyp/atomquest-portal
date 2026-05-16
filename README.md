@@ -29,9 +29,18 @@ graph TD
   - **Firestore Database (NoSQL):** Powers the core logic. We utilized *Firestore Batch Writes* (`writeBatch`) to ensure atomicity when submitting up to 8 goals at once. Global system states (e.g., active Quarterly Check-In phases) are handled via centralized Firestore documents to lock/unlock UI interactions in real-time.
   - **Firebase Hosting:** Provides a global CDN ensuring lightning-fast load times for the portal, with an automated CI/CD-style build script for updates.
 - **Progressive Web App (PWA) Support:** Configured with a complete `manifest.json` and Apple web-app meta tags. The portal is fully installable as a standalone native app on mobile devices (iOS/Android), bypassing the browser URL bar for a truly immersive enterprise experience.
-- **Enterprise Governance & Computation:** Strict adherence to BRD requirements. The system automatically computes mathematical progress scores based on UoM (Max vs Min targets). Furthermore, the Admin can toggle "Quarterly Windows" (e.g., Q1, Q2) to physically lock or unlock employee progress updates, preventing out-of-cycle tampering.
-- **AI Integration:** Instead of standard hardcoded placeholders, we integrated **OpenRouter** securely into the frontend. By passing the Thrust Area and Goal Title to the `anthropic/claude-3-haiku` model with a strict system prompt, the AI acts as a digital HR coach, instantly generating concise SMART goals for the employee.
-- **Premium Polish:** Replaced all native browser alerts with custom, animated `SweetAlert2` modals. Added an interactive Architecture & User Flow Guide directly to the landing page for judges.
+- **Enterprise Governance & Security:** Strict adherence to BRD requirements. The system calculates physical mathematical progress scores. Furthermore:
+  - **Firebase Security Rules:** Implemented granular, Role-Based Access Control (RBAC) at the database layer. No "Test Mode" vulnerabilities.
+  - **Immutable System Audit Logs:** Every critical action (roster allocations, goal approvals, AI usages) is strictly recorded in a tamper-proof timeline visible to Admins.
+- **AI Integration (Employee & Manager):** Integrated **OpenRouter (Claude-3)** securely. Employees receive instant, AI-generated SMART goals. Managers can click "✨ AI Insight" to generate instant, professional performance summaries of their team members.
+- **Enterprise Utilities:**
+  - **PDF Export:** Employees can export their approved goal sheets directly to a print-ready PDF using `html2pdf.js`.
+  - **Excel Export:** Admins can export system rosters using `SheetJS`.
+- **Premium Polish:**
+  - Official Atomberg brand styling and SVG iconography.
+  - Replaced native browser alerts with animated `SweetAlert2` modals.
+  - Persistent, system-wide **Dark Mode** toggle.
+  - Interactive System Guide on the landing page with `fade-in` CSS micro-animations.
 
 ---
 
