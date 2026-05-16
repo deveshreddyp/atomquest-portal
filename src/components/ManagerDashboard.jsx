@@ -144,11 +144,18 @@ export default function ManagerDashboard() {
   };
 
   const pendingRequests = requests.filter(r => r.status === 'pending');
+  const acceptedEmailsList = requests.filter(r => r.status === 'accepted').map(r => r.employeeEmail);
+  
   const groupedGoals = goals.reduce((acc, goal) => {
     if (!acc[goal.employeeEmail]) acc[goal.employeeEmail] = [];
     acc[goal.employeeEmail].push(goal);
     return acc;
   }, {});
+  
+  // Ensure all accepted team members appear on the dashboard, even if they have 0 goals
+  acceptedEmailsList.forEach(email => {
+      if (!groupedGoals[email]) groupedGoals[email] = [];
+  });
 
   const generateAISummary = async (employeeEmail, employeeGoals) => {
     setIsGeneratingSummary(true);
@@ -286,7 +293,9 @@ export default function ManagerDashboard() {
                                   <button onClick={() => generateAISummary(empEmail, employeeGoals)} disabled={isGeneratingSummary} className="bg-white dark:bg-slate-900 text-slate-600 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-bold hover:bg-slate-100 dark:bg-slate-800 flex items-center gap-1">
                                     <Sparkles size={14}/> AI Insight
                                   </button>
-                                  {hasPending ? (
+                                  {employeeGoals.length === 0 ? (
+                                      <span className="text-slate-400 font-bold bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full text-sm">Not Submitted</span>
+                                  ) : hasPending ? (
                                       <button onClick={() => handleApproveAll(empEmail)} className="bg-primary text-slate-900 font-bold py-2 px-5 rounded-lg hover:brightness-110 transition-colors shadow-sm text-sm">
                                           Approve Pending
                                       </button>
@@ -306,7 +315,9 @@ export default function ManagerDashboard() {
                                     </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100">
-                                    {employeeGoals.map((g) => {
+                                    {employeeGoals.length === 0 ? (
+                                        <tr><td colSpan="4" className="px-6 py-8 text-center text-slate-400 dark:text-slate-500 font-medium">No goals submitted yet.</td></tr>
+                                    ) : employeeGoals.map((g) => {
                                         const score = computeScore(g.actualAchievement, g.target, g.uomType);
                                         return (
                                         <tr key={g.id} className="hover:bg-slate-50 dark:bg-slate-950 transition-colors">
