@@ -24,6 +24,7 @@ export default function AdminDashboard() {
   // User Creation State
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [newRole, setNewRole] = useState('Employee');
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   
   // System Phase
@@ -97,7 +98,7 @@ export default function AdminDashboard() {
         
         await addDoc(collection(db, 'system_users'), {
             email: newEmail.toLowerCase().trim(),
-            role: 'Employee', // default, can be updated later if needed
+            role: newRole,
             createdAt: serverTimestamp()
         });
 
@@ -229,6 +230,14 @@ export default function AdminDashboard() {
                     <div>
                         <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Secure Password</label>
                         <input type="password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} required className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 bg-white dark:bg-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="••••••••" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Assign Role</label>
+                        <select value={newRole} onChange={e=>setNewRole(e.target.value)} className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 bg-white dark:bg-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                            <option value="Employee">Employee</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Admin">Admin</option>
+                        </select>
                     </div>
                     <button type="submit" disabled={isCreatingUser} className="w-full bg-slate-800 text-white font-bold py-2.5 rounded-lg hover:bg-slate-700 transition-colors disabled:opacity-50">
                         {isCreatingUser ? 'Creating...' : 'Register User'}
