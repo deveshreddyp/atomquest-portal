@@ -13,6 +13,7 @@
     "@hookform/resolvers": "^5.2.2",
     "autoprefixer": "^10.5.0",
     "firebase": "^12.13.0",
+    "html2pdf.js": "^0.14.0",
     "lucide-react": "^1.16.0",
     "postcss": "^8.5.14",
     "react": "^19.2.6",

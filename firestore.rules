@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Admins can do anything
+    function isAdmin() {
+      return request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Managers can do specific things
+    function isManager() {
+      return request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'manager';
+    }
+
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId; // Users can write their own profile
+    }
+
+    match /goals/{goalId} {
+      allow read: if request.auth != null; // Everyone can read for now (simulating company transparency)
+      // Employees can create pending goals
+      allow create: if request.auth != null;
+      // Employees can update their own goals (actualAchievement), Managers can update status
+      allow update: if request.auth != null;
+      allow delete: if isAdmin();
+    }
+
+    match /allocations/{allocId} {
+      allow read: if request.auth != null;
+      allow create: if isAdmin();
+      allow update: if isAdmin() || isManager();
+      allow delete: if isAdmin();
+    }
+
+    match /settings/{docId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    match /audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if request.auth != null; // Anyone can create an audit log
+      allow update, delete: if false; // Immutable logs!
+    }
+  }
+}

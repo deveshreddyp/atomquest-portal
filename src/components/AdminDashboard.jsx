@@ -3,13 +3,17 @@ import { collection, getDocs, query, orderBy, addDoc, serverTimestamp, doc, getD
 import { db } from '../firebase';
 import * as XLSX from 'xlsx';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
-import { Users, FileDown, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { Users, FileDown, AlertCircle, CheckCircle, Clock, ShieldCheck } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { useAuthStore } from '../store';
+import { logAuditAction } from '../utils';
 
 export default function AdminDashboard() {
   const [goals, setGoals] = useState([]);
   const [allocations, setAllocations] = useState([]);
+  const [auditLogs, setAuditLogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuthStore();
 
   // Roster Form State
   const [empEmail, setEmpEmail] = useState('');
@@ -38,6 +42,11 @@ export default function AdminDashboard() {
       } else {
         await setDoc(doc(db, 'settings', 'system'), { activePhase: 'Goal Setting' });
       }
+
+      const qAudit = query(collection(db, 'audit_logs'), orderBy('timestamp', 'desc'));
+      const snapAudit = await getDocs(qAudit);
+      setAuditLogs(snapAudit.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+
     } catch (err) {
       console.error(err);
     }
@@ -56,6 +65,7 @@ export default function AdminDashboard() {
         });
         setEmpEmail('');
         setMgrEmail('');
+        await logAuditAction(user.email, 'ROSTER_ALLOCATION', `Requested assignment: ${empEmail} -> ${mgrEmail}`);
         Swal.fire('Success', 'Allocation Request sent to Manager!', 'success');
         fetchData();
     } catch (err) {
@@ -67,6 +77,7 @@ export default function AdminDashboard() {
     setActivePhase(newPhase);
     try {
         await setDoc(doc(db, 'settings', 'system'), { activePhase: newPhase }, { merge: true });
+        await logAuditAction(user.email, 'PHASE_UPDATE', `Changed system phase to ${newPhase}`);
         Swal.fire('Success', `System Phase successfully updated to: ${newPhase}`, 'success');
     } catch (err) {
         Swal.fire('Error', "Error updating phase: " + err.message, 'error');
@@ -108,13 +119,13 @@ export default function AdminDashboard() {
     <div className="max-w-7xl mx-auto space-y-8 pb-20">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-black text-slate-800 tracking-tight">Admin Control Center</h2>
-          <p className="text-slate-500 mt-1">Manage global analytics, audits, and roster allocations.</p>
+          <h2 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">Admin Control Center</h2>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Manage global analytics, audits, and roster allocations.</p>
         </div>
         <div className="flex gap-4">
-            <div className="bg-white border border-slate-200 rounded-lg p-1.5 flex items-center shadow-sm">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 px-3">System Phase:</span>
-                <select value={activePhase} onChange={e=>handleUpdatePhase(e.target.value)} className="bg-slate-50 border border-slate-200 rounded text-sm font-bold p-1.5 outline-none text-slate-800 focus:border-primary">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-1.5 flex items-center shadow-sm">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 px-3">System Phase:</span>
+                <select value={activePhase} onChange={e=>handleUpdatePhase(e.target.value)} className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded text-sm font-bold p-1.5 outline-none text-slate-800 dark:text-white focus:border-primary">
                     <option value="Goal Setting">Goal Setting</option>
                     <option value="Q1 Check-in">Q1 Check-in</option>
                     <option value="Q2 Check-in">Q2 Check-in</option>
@@ -129,22 +140,22 @@ export default function AdminDashboard() {
       </div>
 
       {/* Roster Allocation Module */}
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
-        <h3 className="font-black text-xl text-slate-800 flex items-center gap-2 mb-6">
+      <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+        <h3 className="font-black text-xl text-slate-800 dark:text-white flex items-center gap-2 mb-6">
             <Users className="text-primary" /> Roster Management & Allocations
         </h3>
         
         <div className="grid grid-cols-3 gap-8">
-            <div className="col-span-1 bg-slate-50 p-6 rounded-xl border border-slate-200">
-                <h4 className="font-bold text-slate-800 mb-4">Create New Allocation</h4>
+            <div className="col-span-1 bg-slate-50 dark:bg-slate-950 p-6 rounded-xl border border-slate-200 dark:border-slate-800">
+                <h4 className="font-bold text-slate-800 dark:text-white mb-4">Create New Allocation</h4>
                 <form onSubmit={handleAllocate} className="space-y-4">
                     <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Employee Email</label>
-                        <input type="email" value={empEmail} onChange={e=>setEmpEmail(e.target.value)} required className="w-full border border-slate-300 rounded-lg p-2.5 bg-white outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="employee@test.com" />
+                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Employee Email</label>
+                        <input type="email" value={empEmail} onChange={e=>setEmpEmail(e.target.value)} required className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 bg-white dark:bg-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="employee@test.com" />
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Manager Email</label>
-                        <input type="email" value={mgrEmail} onChange={e=>setMgrEmail(e.target.value)} required className="w-full border border-slate-300 rounded-lg p-2.5 bg-white outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="manager@test.com" />
+                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Manager Email</label>
+                        <input type="email" value={mgrEmail} onChange={e=>setMgrEmail(e.target.value)} required className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 bg-white dark:bg-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="manager@test.com" />
                     </div>
                     <button type="submit" className="w-full bg-primary text-white font-bold py-2.5 rounded-lg hover:bg-emerald-600 transition-colors">
                         Send Allocation Request
@@ -153,10 +164,10 @@ export default function AdminDashboard() {
             </div>
 
             <div className="col-span-2">
-                <h4 className="font-bold text-slate-800 mb-4">Allocation Status Logs</h4>
-                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden h-64 overflow-y-auto">
+                <h4 className="font-bold text-slate-800 dark:text-white mb-4">Allocation Status Logs</h4>
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden h-64 overflow-y-auto">
                     <table className="w-full text-left text-sm whitespace-nowrap">
-                        <thead className="bg-slate-50 text-slate-500 border-b border-slate-200 sticky top-0">
+                        <thead className="bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 sticky top-0">
                         <tr>
                             <th className="px-6 py-3 font-semibold">Status</th>
                             <th className="px-6 py-3 font-semibold">Employee</th>
@@ -165,18 +176,18 @@ export default function AdminDashboard() {
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {allocations.map(a => (
-                                <tr key={a.id} className="hover:bg-slate-50">
+                                <tr key={a.id} className="hover:bg-slate-50 dark:bg-slate-950">
                                     <td className="px-6 py-3">
                                         {a.status === 'pending' && <span className="flex items-center gap-1 text-amber-600 bg-amber-50 px-2 py-1 rounded-md text-xs font-bold w-max"><Clock size={14}/> Pending</span>}
                                         {a.status === 'accepted' && <span className="flex items-center gap-1 text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md text-xs font-bold w-max"><CheckCircle size={14}/> Accepted</span>}
                                         {a.status === 'conflict' && <span className="flex items-center gap-1 text-red-600 bg-red-50 px-2 py-1 rounded-md text-xs font-bold w-max"><AlertCircle size={14}/> Conflict (Rejected)</span>}
                                     </td>
-                                    <td className="px-6 py-3 font-medium text-slate-800">{a.employeeEmail}</td>
+                                    <td className="px-6 py-3 font-medium text-slate-800 dark:text-white">{a.employeeEmail}</td>
                                     <td className="px-6 py-3 text-slate-600">{a.managerEmail}</td>
                                 </tr>
                             ))}
                             {allocations.length === 0 && (
-                                <tr><td colSpan="3" className="px-6 py-8 text-center text-slate-500">No roster allocations created yet.</td></tr>
+                                <tr><td colSpan="3" className="px-6 py-8 text-center text-slate-500 dark:text-slate-400">No roster allocations created yet.</td></tr>
                             )}
                         </tbody>
                     </table>
@@ -185,10 +196,35 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {/* Audit Log Module */}
+      <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+        <h3 className="font-black text-xl text-slate-800 dark:text-white flex items-center gap-2 mb-6">
+            <ShieldCheck className="text-primary" /> System Audit Logs
+        </h3>
+        <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden h-48 overflow-y-auto p-4">
+            {auditLogs.length === 0 ? <p className="text-slate-500 dark:text-slate-400 text-center mt-10">No audit logs available.</p> : (
+                <ul className="space-y-3">
+                    {auditLogs.map(log => (
+                        <li key={log.id} className="text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 p-3 rounded shadow-sm border border-slate-100 flex justify-between items-center">
+                            <div>
+                                <span className="font-bold text-slate-900 mr-2">{log.actorEmail}</span>
+                                <span className="text-xs bg-slate-200 px-2 py-0.5 rounded font-bold uppercase tracking-wider text-slate-600 mr-2">{log.action}</span>
+                                <span>{log.details}</span>
+                            </div>
+                            <span className="text-xs text-slate-400 font-medium">
+                                {log.timestamp?.toDate().toLocaleString() || 'Just now'}
+                            </span>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+      </div>
+
       {/* Analytics Module */}
       <div className="grid grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <h3 className="font-bold text-lg text-slate-800 mb-4">Goal Distribution by Thrust Area</h3>
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+          <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4">Goal Distribution by Thrust Area</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -202,8 +238,8 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <h3 className="font-bold text-lg text-slate-800 mb-4">Approval Completion Rate</h3>
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+          <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4">Approval Completion Rate</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={statusData} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>

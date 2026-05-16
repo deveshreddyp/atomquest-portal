@@ -3,8 +3,10 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { collection, serverTimestamp, writeBatch, doc, query, where, getDocs, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuthStore } from '../store';
-import { Target, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Target, CheckCircle2, AlertCircle, FileDown } from 'lucide-react';
 import Swal from 'sweetalert2';
+import html2pdf from 'html2pdf.js';
+import { logAuditAction } from '../utils';
 
 export default function EmployeeDashboard() {
   const { user } = useAuthStore();
@@ -96,6 +98,7 @@ export default function EmployeeDashboard() {
       });
       await batch.commit();
       fetchMyGoals();
+      await logAuditAction(user.email, 'GOAL_SUBMISSION', `Submitted ${data.goals.length} goals for approval`);
       Swal.fire('Notification', "Successfully submitted to Manager for approval!", 'info');
     } catch (err) {
         Swal.fire('Notification', "Error saving: " + err.message, 'info');
@@ -110,6 +113,7 @@ export default function EmployeeDashboard() {
             progressStatus: progStatus,
             lastUpdated: serverTimestamp()
         });
+        await logAuditAction(user.email, 'PROGRESS_UPDATE', `Updated progress to ${actualVal}`);
         Swal.fire('Notification', "Progress Updated!", 'info');
         setUpdateGoalId(null); setActualVal(''); setProgStatus('On Track');
         fetchMyGoals();
@@ -141,18 +145,34 @@ export default function EmployeeDashboard() {
       return Math.max(0, Math.round(score));
   };
 
+  const exportPDF = () => {
+    const element = document.getElementById('goal-sheet');
+    html2pdf().from(element).set({
+      margin: 1,
+      filename: 'AtomQuest_Goal_Sheet.pdf',
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    }).save();
+    logAuditAction(user.email, 'EXPORT_PDF', 'Exported goal sheet as PDF');
+  };
+
   if (loading) return <div className="text-center py-20">Loading your profile...</div>;
 
   if (existingGoals) {
     const isApproved = existingGoals.every(g => g.status === 'approved');
     return (
-      <div className="max-w-5xl mx-auto space-y-8 pb-20">
-        <div className="bg-white p-10 shadow-sm rounded-2xl border border-slate-200 text-center">
-          <div className="inline-block p-4 rounded-full bg-slate-50 mb-4">
+      <div id="goal-sheet" className="max-w-5xl mx-auto space-y-8 pb-20">
+        <div className="bg-white dark:bg-slate-900 p-10 shadow-sm rounded-2xl border border-slate-200 dark:border-slate-800 text-center relative">
+          <div className="absolute top-6 right-6">
+            <button onClick={exportPDF} className="bg-slate-900 text-white flex items-center gap-2 px-4 py-2 rounded-lg font-bold hover:bg-slate-800 text-sm transition-colors shadow-sm" data-html2canvas-ignore="true">
+                <FileDown size={16}/> Export PDF
+            </button>
+          </div>
+          <div className="inline-block p-4 rounded-full bg-slate-50 dark:bg-slate-950 mb-4">
             {isApproved ? <CheckCircle2 className="w-12 h-12 text-emerald-500" /> : <AlertCircle className="w-12 h-12 text-amber-500" />}
           </div>
-          <h2 className="text-3xl font-black text-slate-800 tracking-tight">Your Goal Sheet is {isApproved ? 'Approved!' : 'Under Review'}</h2>
-          <p className="text-slate-500 mt-2 max-w-lg mx-auto">
+          <h2 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">Your Goal Sheet is {isApproved ? 'Approved!' : 'Under Review'}</h2>
+          <p className="text-slate-500 dark:text-slate-400 mt-2 max-w-lg mx-auto">
             {isApproved 
               ? "Your manager has approved your goals. You can now log your Quarterly Check-in progress below."
               : "Your manager is currently reviewing your submission. Check back later."}
@@ -163,19 +183,19 @@ export default function EmployeeDashboard() {
           {existingGoals.map((g) => {
             const score = computeScore(g.actualAchievement, g.target, g.uomType);
             return (
-            <div key={g.id} className="p-6 border border-slate-200 rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+            <div key={g.id} className="p-6 border border-slate-200 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
               {g.isShared && <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-black uppercase px-3 py-1 rounded-bl-lg">Mandated KPI</div>}
               
               <div className="mb-4 pr-12">
                 <span className="text-xs font-bold uppercase tracking-wider text-primary mb-1 block">{g.thrustArea}</span>
-                <h4 className="font-bold text-slate-800 text-lg">{g.title}</h4>
-                <p className="text-sm text-slate-500 mt-2 line-clamp-2">{g.description}</p>
+                <h4 className="font-bold text-slate-800 dark:text-white text-lg">{g.title}</h4>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 line-clamp-2">{g.description}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl mb-4 border border-slate-100">
+              <div className="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl mb-4 border border-slate-100">
                 <div>
                     <div className="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Target</div>
-                    <div className="text-lg font-black text-slate-800 flex items-center gap-1"><Target size={16}/> {g.target} <span className="text-xs text-slate-500">{g.uomType}</span></div>
+                    <div className="text-lg font-black text-slate-800 dark:text-white flex items-center gap-1"><Target size={16}/> {g.target} <span className="text-xs text-slate-500 dark:text-slate-400">{g.uomType}</span></div>
                 </div>
                 <div>
                     <div className="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Actual Progress</div>
@@ -197,7 +217,7 @@ export default function EmployeeDashboard() {
                           <button onClick={()=>handleSetSharedWeight(g.id, document.getElementById(`weight-${g.id}`).value)} className="bg-primary text-white text-sm font-bold px-4 rounded-lg">Save</button>
                       </div>
                   ) : (
-                      <div className="text-sm font-black text-slate-800 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+                      <div className="text-sm font-black text-slate-800 dark:text-white bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800">
                         Weight: {g.weightage}%
                       </div>
                   )}
@@ -220,24 +240,24 @@ export default function EmployeeDashboard() {
         {/* Update Progress Modal */}
         {updateGoalId && (
             <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
-                    <h3 className="text-2xl font-black text-slate-800 mb-2">Quarterly Check-In</h3>
-                    <p className="text-slate-500 mb-6 text-sm">Log your actual achievement against your planned target.</p>
+                <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 max-w-md w-full shadow-2xl">
+                    <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-2">Quarterly Check-In</h3>
+                    <p className="text-slate-500 dark:text-slate-400 mb-6 text-sm">Log your actual achievement against your planned target.</p>
                     <form onSubmit={handleUpdateProgress} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-1">Actual Value Achieved</label>
-                            <input type="number" value={actualVal} onChange={e=>setActualVal(e.target.value)} required className="w-full border border-slate-300 rounded-lg p-3 outline-none focus:border-primary" />
+                            <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1">Actual Value Achieved</label>
+                            <input type="number" value={actualVal} onChange={e=>setActualVal(e.target.value)} required className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-3 outline-none focus:border-primary" />
                         </div>
                         <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-1">Status</label>
-                            <select value={progStatus} onChange={e=>setProgStatus(e.target.value)} className="w-full border border-slate-300 rounded-lg p-3 outline-none focus:border-primary">
+                            <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1">Status</label>
+                            <select value={progStatus} onChange={e=>setProgStatus(e.target.value)} className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-3 outline-none focus:border-primary">
                                 <option>Not Started</option>
                                 <option>On Track</option>
                                 <option>Completed</option>
                             </select>
                         </div>
                         <div className="flex gap-3 mt-6 pt-6 border-t border-slate-100">
-                            <button type="button" onClick={()=>setUpdateGoalId(null)} className="w-full bg-slate-100 text-slate-600 font-bold py-3 rounded-lg hover:bg-slate-200">Cancel</button>
+                            <button type="button" onClick={()=>setUpdateGoalId(null)} className="w-full bg-slate-100 dark:bg-slate-800 text-slate-600 font-bold py-3 rounded-lg hover:bg-slate-200">Cancel</button>
                             <button type="submit" className="w-full bg-primary text-white font-bold py-3 rounded-lg hover:bg-emerald-600">Save Progress</button>
                         </div>
                     </form>
@@ -250,11 +270,11 @@ export default function EmployeeDashboard() {
 
   // Original Goal Creation Form (unchanged logic)
   return (
-    <div className="max-w-4xl mx-auto bg-white p-10 shadow-xl rounded-2xl border border-slate-200 pb-20">
+    <div className="max-w-4xl mx-auto bg-white dark:bg-slate-900 p-10 shadow-xl rounded-2xl border border-slate-200 dark:border-slate-800 pb-20">
       <div className="flex justify-between items-center mb-8 border-b border-slate-100 pb-6">
         <div>
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight">Create Goal Sheet</h2>
-            <p className="text-slate-500 mt-1">Define your objectives for the current quarter.</p>
+            <h2 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">Create Goal Sheet</h2>
+            <p className="text-slate-500 dark:text-slate-400 mt-1">Define your objectives for the current quarter.</p>
         </div>
         <div className={`px-5 py-2.5 rounded-xl font-black text-lg transition-colors ${totalWeightage === 100 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
           Total Weight: {totalWeightage}%
@@ -263,9 +283,9 @@ export default function EmployeeDashboard() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {fields.map((field, index) => (
-          <div key={field.id} className="p-6 border border-slate-200 rounded-xl space-y-5 bg-slate-50/50 relative group transition-all hover:border-slate-300">
+          <div key={field.id} className="p-6 border border-slate-200 dark:border-slate-800 rounded-xl space-y-5 bg-slate-50 dark:bg-slate-950/50 relative group transition-all hover:border-slate-300 dark:border-slate-700">
             <div className="flex justify-between items-center">
-                <h3 className="font-bold text-lg text-slate-800">Goal {index + 1}</h3>
+                <h3 className="font-bold text-lg text-slate-800 dark:text-white">Goal {index + 1}</h3>
                 {index > 0 && (
                     <button type="button" onClick={() => remove(index)} className="text-slate-400 hover:text-red-500 font-medium transition-colors text-sm">Remove</button>
                 )}
@@ -273,51 +293,51 @@ export default function EmployeeDashboard() {
             
             <div className="grid grid-cols-2 gap-5">
               <div>
-                <label className="block text-sm font-semibold mb-1.5 text-slate-700">Thrust Area</label>
-                <select {...register(`goals.${index}.thrustArea`)} className="w-full border border-slate-300 rounded-lg p-2.5 bg-white outline-none focus:border-primary">
+                <label className="block text-sm font-semibold mb-1.5 text-slate-700 dark:text-slate-200">Thrust Area</label>
+                <select {...register(`goals.${index}.thrustArea`)} className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 bg-white dark:bg-slate-900 outline-none focus:border-primary">
                   <option value="Operations">Operations</option>
                   <option value="Sales">Sales</option>
                   <option value="Quality">Quality</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1.5 text-slate-700">Title</label>
-                <input {...register(`goals.${index}.title`)} placeholder="e.g. Reduce server downtime" className="w-full border border-slate-300 rounded-lg p-2.5 bg-white outline-none focus:border-primary" required />
+                <label className="block text-sm font-semibold mb-1.5 text-slate-700 dark:text-slate-200">Title</label>
+                <input {...register(`goals.${index}.title`)} placeholder="e.g. Reduce server downtime" className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 bg-white dark:bg-slate-900 outline-none focus:border-primary" required />
               </div>
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-1.5">
-                <label className="block text-sm font-semibold text-slate-700">SMART Description</label>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">SMART Description</label>
                 <button type="button" onClick={() => suggestSMARTGoal(index)} disabled={isSuggesting === index} className="text-primary text-sm font-bold flex items-center gap-1.5 hover:opacity-80 transition-opacity bg-emerald-50 px-3 py-1 rounded-md">
                   ✨ {isSuggesting === index ? "Generating..." : "Generate AI Description"}
                 </button>
               </div>
-              <textarea {...register(`goals.${index}.description`)} rows="3" placeholder="Describe the specifics..." className="w-full border border-slate-300 rounded-lg p-3 bg-white outline-none focus:border-primary resize-none" required></textarea>
+              <textarea {...register(`goals.${index}.description`)} rows="3" placeholder="Describe the specifics..." className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-3 bg-white dark:bg-slate-900 outline-none focus:border-primary resize-none" required></textarea>
             </div>
 
             <div className="grid grid-cols-3 gap-5">
               <div>
-                <label className="block text-sm font-semibold mb-1.5 text-slate-700">UoM Type</label>
-                <select {...register(`goals.${index}.uomType`)} className="w-full border border-slate-300 rounded-lg p-2.5 bg-white outline-none focus:border-primary">
+                <label className="block text-sm font-semibold mb-1.5 text-slate-700 dark:text-slate-200">UoM Type</label>
+                <select {...register(`goals.${index}.uomType`)} className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 bg-white dark:bg-slate-900 outline-none focus:border-primary">
                   <option value="min">Min (Target to Reach)</option>
                   <option value="max">Max (Target to Reduce)</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1.5 text-slate-700">Target Value</label>
-                <input type="number" {...register(`goals.${index}.target`)} className="w-full border border-slate-300 rounded-lg p-2.5 bg-white outline-none focus:border-primary" required />
+                <label className="block text-sm font-semibold mb-1.5 text-slate-700 dark:text-slate-200">Target Value</label>
+                <input type="number" {...register(`goals.${index}.target`)} className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 bg-white dark:bg-slate-900 outline-none focus:border-primary" required />
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-1.5 text-slate-700">Weightage (%)</label>
-                <input type="number" {...register(`goals.${index}.weightage`)} className="w-full border border-slate-300 rounded-lg p-2.5 bg-white outline-none focus:border-primary" required />
+                <label className="block text-sm font-semibold mb-1.5 text-slate-700 dark:text-slate-200">Weightage (%)</label>
+                <input type="number" {...register(`goals.${index}.weightage`)} className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 bg-white dark:bg-slate-900 outline-none focus:border-primary" required />
               </div>
             </div>
           </div>
         ))}
 
         <div className="flex justify-between pt-6 border-t border-slate-100 mt-8">
-          <button type="button" onClick={() => append({ thrustArea: 'Operations', title: '', description: '', uomType: 'min', target: 0, weightage: 10 })} className="bg-slate-100 text-slate-700 font-bold py-3 px-6 rounded-lg hover:bg-slate-200">
+          <button type="button" onClick={() => append({ thrustArea: 'Operations', title: '', description: '', uomType: 'min', target: 0, weightage: 10 })} className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold py-3 px-6 rounded-lg hover:bg-slate-200">
             + Add Another Goal
           </button>
           <button type="submit" disabled={totalWeightage !== 100 || fields.length > 8} className="bg-slate-900 text-white font-bold py-3 px-10 rounded-lg disabled:opacity-50 hover:bg-slate-800 shadow-md">
