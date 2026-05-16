@@ -167,6 +167,29 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleClearAuditLogs = async () => {
+    const result = await Swal.fire({
+      title: 'Clear System Audit Logs?',
+      text: 'This will permanently delete all audit logs. This action is irreversible. Proceed?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, clear all logs',
+      confirmButtonColor: '#ef4444'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'audit_logs'));
+        const deletePromises = querySnapshot.docs.map(document => deleteDoc(doc(db, 'audit_logs', document.id)));
+        await Promise.all(deletePromises);
+        Swal.fire('Cleared!', 'All audit logs have been deleted.', 'success');
+        fetchData();
+      } catch (err) {
+        Swal.fire('Error', "Failed to clear logs: " + err.message, 'error');
+      }
+    }
+  };
+
   const handleUpdatePhase = async (newPhase) => {
     setActivePhase(newPhase);
     try {
@@ -353,9 +376,14 @@ export default function AdminDashboard() {
 
       {/* Audit Log Module */}
       <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
-        <h3 className="font-black text-xl text-slate-800 dark:text-white flex items-center gap-2 mb-6">
-            <ShieldCheck className="text-yellow-600 dark:text-yellow-400" /> System Audit Logs
-        </h3>
+        <div className="flex justify-between items-center mb-6">
+            <h3 className="font-black text-xl text-slate-800 dark:text-white flex items-center gap-2">
+                <ShieldCheck className="text-yellow-600 dark:text-yellow-400" /> System Audit Logs
+            </h3>
+            <button onClick={handleClearAuditLogs} className="text-xs bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 px-3 py-1.5 rounded-md font-bold transition-colors flex items-center gap-1">
+                <Trash2 size={14} /> Clear Logs
+            </button>
+        </div>
         <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden h-48 overflow-y-auto p-4">
             {auditLogs.length === 0 ? <p className="text-slate-500 dark:text-slate-400 text-center mt-10">No audit logs available.</p> : (
                 <ul className="space-y-3">
