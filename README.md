@@ -28,19 +28,17 @@ graph TD
   - **Firebase Auth:** Handles secure session creation.
   - **Firestore Database (NoSQL):** Powers the core logic. We utilized *Firestore Batch Writes* (`writeBatch`) to ensure atomicity when submitting up to 8 goals at once. Global system states (e.g., active Quarterly Check-In phases) are handled via centralized Firestore documents to lock/unlock UI interactions in real-time.
   - **Firebase Hosting:** Provides a global CDN ensuring lightning-fast load times for the portal, with an automated CI/CD-style build script for updates.
-- **Progressive Web App (PWA) Support:** Configured with a complete `manifest.json` and Apple web-app meta tags. The portal is fully installable as a standalone native app on mobile devices (iOS/Android), bypassing the browser URL bar for a truly immersive enterprise experience.
-- **Enterprise Governance & Security:** Strict adherence to BRD requirements. The system calculates physical mathematical progress scores. Furthermore:
-  - **Firebase Security Rules:** Implemented granular, Role-Based Access Control (RBAC) at the database layer. No "Test Mode" vulnerabilities.
-  - **Immutable System Audit Logs:** Every critical action (roster allocations, goal approvals, AI usages) is strictly recorded in a tamper-proof timeline visible to Admins.
-- **AI Integration (Employee & Manager):** Integrated **OpenRouter (Claude-3)** securely. Employees receive instant, AI-generated SMART goals. Managers can click "✨ AI Insight" to generate instant, professional performance summaries of their team members.
-- **Enterprise Utilities:**
-  - **PDF Export:** Employees can export their approved goal sheets directly to a print-ready PDF using `html2pdf.js`.
-  - **Excel Export:** Admins can export system rosters using `SheetJS`.
-- **Premium Polish:**
-  - Official Atomberg brand styling and SVG iconography.
-  - Replaced native browser alerts with animated `SweetAlert2` modals.
-  - Persistent, system-wide **Dark Mode** toggle.
-  - Interactive System Guide on the landing page with `fade-in` CSS micro-animations.
+
+## 🚀 Hackathon Winning Features
+1. **Manager-Employee Feedback Loop:** A complete interactive workflow where Managers can "Reject & Comment" on individual goals. Employees receive immediate alerts on their dashboard, view the Manager's required changes, and can edit and resubmit their targets directly.
+2. **Immutable System Audit Logs:** Every critical action (roster allocations, goal approvals, AI usages, feedback submissions) is strictly recorded in a tamper-proof timeline visible to Admins.
+3. **AI Integration (Claude-3):** Integrated OpenRouter securely. Employees receive instant, AI-generated SMART goals. Managers can click "✨ AI Insight" to generate instant, professional performance summaries of their team members based on their targets and achievements.
+4. **Push Shared KPIs:** Managers can create overarching departmental goals and force-push them onto the active goal sheets of their entire roster simultaneously.
+5. **Progressive Web App (PWA):** Configured with a complete `manifest.json` and Apple web-app meta tags. The portal is fully installable as a standalone native app on mobile devices (iOS/Android), bypassing the browser URL bar.
+6. **Enterprise Utilities:** 
+   - **PDF Export:** Employees can export their approved goal sheets directly to a print-ready PDF using `html2pdf.js`.
+   - **Excel Export:** Admins can export system rosters using `SheetJS`.
+7. **Premium Atomberg Branding:** Official high-resolution transparent wordmarks, custom Favicons, Atomberg Yellow `#FDB913` core themes, and sleek micro-interactions (`hover:scale`) integrated throughout.
 
 ---
 
