@@ -130,6 +130,30 @@ export default function EmployeeDashboard() {
       } catch (err) { Swal.fire('Notification', "Failed to update weight.", 'info'); }
   };
 
+  const handleResubmitGoal = async (goalId, currentTarget) => {
+      const { value: newTarget } = await Swal.fire({
+          title: 'Resubmit Goal',
+          input: 'number',
+          inputLabel: 'Update your Target based on Manager Feedback',
+          inputValue: currentTarget,
+          showCancelButton: true
+      });
+      if (newTarget) {
+          try {
+              await updateDoc(doc(db, 'goals', goalId), {
+                  target: newTarget,
+                  status: 'pending',
+                  feedback: null // Clear feedback after resubmit
+              });
+              await logAuditAction(user.email, 'RESUBMITTED_GOAL', `Resubmitted goal ${goalId} after feedback`);
+              Swal.fire('Resubmitted', 'Goal sent back for review', 'success');
+              fetchMyGoals();
+          } catch(err) {
+              Swal.fire('Error', 'Failed to resubmit', 'error');
+          }
+      }
+  };
+
   const computeScore = (actual, target, uom) => {
       if (actual === undefined || actual === null) return null;
       const act = Number(actual);
@@ -160,6 +184,8 @@ export default function EmployeeDashboard() {
 
   if (existingGoals) {
     const isApproved = existingGoals.every(g => g.status === 'approved');
+    const hasConflict = existingGoals.some(g => g.status === 'conflict');
+    
     return (
       <div id="goal-sheet" className="max-w-5xl mx-auto space-y-8 pb-20">
         <div className="bg-white dark:bg-slate-900 p-10 shadow-sm rounded-2xl border border-slate-200 dark:border-slate-800 text-center relative">
@@ -169,11 +195,15 @@ export default function EmployeeDashboard() {
             </button>
           </div>
           <div className="inline-block p-4 rounded-full bg-slate-50 dark:bg-slate-950 mb-4">
-            {isApproved ? <CheckCircle2 className="w-12 h-12 text-emerald-500" /> : <AlertCircle className="w-12 h-12 text-amber-500" />}
+            {hasConflict ? <AlertCircle className="w-12 h-12 text-red-500" /> : isApproved ? <CheckCircle2 className="w-12 h-12 text-emerald-500" /> : <AlertCircle className="w-12 h-12 text-amber-500" />}
           </div>
-          <h2 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">Your Goal Sheet is {isApproved ? 'Approved!' : 'Under Review'}</h2>
+          <h2 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">
+             {hasConflict ? 'Action Required: Revisions Needed' : isApproved ? 'Your Goal Sheet is Approved!' : 'Your Goal Sheet is Under Review'}
+          </h2>
           <p className="text-slate-500 dark:text-slate-400 mt-2 max-w-lg mx-auto">
-            {isApproved 
+            {hasConflict 
+              ? "Your manager has requested changes to one or more of your goals. Please review their feedback and resubmit."
+              : isApproved 
               ? "Your manager has approved your goals. You can now log your Quarterly Check-in progress below."
               : "Your manager is currently reviewing your submission. Check back later."}
           </p>
@@ -187,9 +217,19 @@ export default function EmployeeDashboard() {
               {g.isShared && <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-black uppercase px-3 py-1 rounded-bl-lg">Mandated KPI</div>}
               
               <div className="mb-4 pr-12">
-                <span className="text-xs font-bold uppercase tracking-wider text-yellow-600 dark:text-yellow-400 mb-1 block">{g.thrustArea}</span>
+                <div className="flex justify-between items-start mb-1">
+                    <span className="text-xs font-bold uppercase tracking-wider text-yellow-600 dark:text-yellow-400">{g.thrustArea}</span>
+                    {g.status === 'conflict' && <span className="bg-red-100 text-red-600 text-[10px] uppercase font-black px-2 py-0.5 rounded">Action Required</span>}
+                </div>
                 <h4 className="font-bold text-slate-800 dark:text-white text-lg">{g.title}</h4>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 line-clamp-2">{g.description}</p>
+                
+                {g.status === 'conflict' && g.feedback && (
+                    <div className="mt-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-3 rounded-r-lg">
+                        <p className="text-xs font-bold text-red-600 dark:text-red-400 uppercase mb-1">Manager Feedback</p>
+                        <p className="text-sm text-red-800 dark:text-red-200">{g.feedback}</p>
+                    </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl mb-4 border border-slate-100">
@@ -230,6 +270,14 @@ export default function EmployeeDashboard() {
                           title={activePhase === 'Goal Setting' ? 'Quarterly check-in is currently locked by the Admin.' : 'Update your progress'}
                       >
                           {activePhase === 'Goal Setting' ? 'Locked (Goal Setting Phase)' : 'Update Progress →'}
+                      </button>
+                  )}
+                  {g.status === 'conflict' && (
+                      <button 
+                          onClick={() => handleResubmitGoal(g.id, g.target)} 
+                          className="text-white bg-slate-900 px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-800 transition-colors"
+                      >
+                          Edit & Resubmit
                       </button>
                   )}
               </div>

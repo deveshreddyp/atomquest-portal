@@ -86,6 +86,30 @@ export default function ManagerDashboard() {
     }
   };
 
+  const handleRejectGoal = async (goalId, goalTitle) => {
+    const { value: feedback } = await Swal.fire({
+      title: 'Reject Goal',
+      input: 'textarea',
+      inputLabel: `Provide feedback for: ${goalTitle}`,
+      inputPlaceholder: 'Type required changes here...',
+      showCancelButton: true
+    });
+
+    if (feedback) {
+      try {
+          await updateDoc(doc(db, 'goals', goalId), {
+            status: 'conflict',
+            feedback: feedback
+          });
+          await logAuditAction(user.email, 'REJECTED_GOAL', `Rejected goal ${goalId} with feedback`);
+          Swal.fire('Rejected', 'Feedback sent to employee', 'success');
+          fetchDashboardData();
+      } catch (err) {
+          Swal.fire('Error', "Failed to reject: " + err.message, 'error');
+      }
+    }
+  };
+
   const handlePushSharedGoal = async (e) => {
     e.preventDefault();
     const acceptedEmails = requests.filter(r => r.status === 'accepted').map(r => r.employeeEmail);
@@ -301,7 +325,12 @@ export default function ManagerDashboard() {
                                         </td>
                                         <td className="px-6 py-4">
                                             {g.status === 'pending' ? (
-                                                <span className="text-amber-600 text-xs font-bold uppercase">Pending</span>
+                                                <div className="flex gap-2 items-center">
+                                                    <span className="text-amber-600 text-xs font-bold uppercase">Pending</span>
+                                                    <button onClick={() => handleRejectGoal(g.id, g.title)} className="bg-red-50 text-red-600 px-2 py-1 rounded text-xs font-bold hover:bg-red-100 transition-colors">Reject & Comment</button>
+                                                </div>
+                                            ) : g.status === 'conflict' ? (
+                                                <span className="text-red-600 text-xs font-bold uppercase">Conflict</span>
                                             ) : g.progressStatus ? (
                                                 <span className="text-blue-600 text-xs font-bold uppercase">{g.progressStatus}</span>
                                             ) : (
