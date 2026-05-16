@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs, query, orderBy, addDoc, serverTimestamp, doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { db, secondaryApp } from '../firebase';
 import * as XLSX from 'xlsx';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import { Users, FileDown, AlertCircle, CheckCircle, Clock, ShieldCheck } from 'lucide-react';
@@ -18,6 +19,11 @@ export default function AdminDashboard() {
   // Roster Form State
   const [empEmail, setEmpEmail] = useState('');
   const [mgrEmail, setMgrEmail] = useState('');
+  
+  // User Creation State
+  const [newEmail, setNewEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
   
   // System Phase
   const [activePhase, setActivePhase] = useState('Goal Setting');
@@ -51,6 +57,24 @@ export default function AdminDashboard() {
       console.error(err);
     }
     setLoading(false);
+  };
+
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    if(!newEmail || !newPassword) return;
+    setIsCreatingUser(true);
+    try {
+        const secondaryAuth = getAuth(secondaryApp);
+        await createUserWithEmailAndPassword(secondaryAuth, newEmail.toLowerCase().trim(), newPassword);
+        
+        await logAuditAction(user.email, 'CREATE_USER', `Created new system user: ${newEmail}`);
+        Swal.fire('Success', `User ${newEmail} created successfully!`, 'success');
+        setNewEmail('');
+        setNewPassword('');
+    } catch (err) {
+        Swal.fire('Error', "Failed to create user: " + err.message, 'error');
+    }
+    setIsCreatingUser(false);
   };
 
   const handleAllocate = async (e) => {
@@ -139,15 +163,34 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Roster Allocation Module */}
+      {/* Identity & Roster Allocation Module */}
       <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
         <h3 className="font-black text-xl text-slate-800 dark:text-white flex items-center gap-2 mb-6">
-            <Users className="text-yellow-600 dark:text-yellow-400" /> Roster Management & Allocations
+            <Users className="text-yellow-600 dark:text-yellow-400" /> Identity & Roster Management
         </h3>
         
-        <div className="grid grid-cols-3 gap-8">
+        <div className="grid grid-cols-4 gap-6">
+            {/* Create System User */}
             <div className="col-span-1 bg-slate-50 dark:bg-slate-950 p-6 rounded-xl border border-slate-200 dark:border-slate-800">
-                <h4 className="font-bold text-slate-800 dark:text-white mb-4">Create New Allocation</h4>
+                <h4 className="font-bold text-slate-800 dark:text-white mb-4">Create System User</h4>
+                <form onSubmit={handleCreateUser} className="space-y-4">
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">New User Email</label>
+                        <input type="email" value={newEmail} onChange={e=>setNewEmail(e.target.value)} required className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 bg-white dark:bg-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="new@test.com" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Secure Password</label>
+                        <input type="password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} required className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 bg-white dark:bg-slate-900 outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="••••••••" />
+                    </div>
+                    <button type="submit" disabled={isCreatingUser} className="w-full bg-slate-800 text-white font-bold py-2.5 rounded-lg hover:bg-slate-700 transition-colors disabled:opacity-50">
+                        {isCreatingUser ? 'Creating...' : 'Register User'}
+                    </button>
+                </form>
+            </div>
+
+            {/* Create Allocation */}
+            <div className="col-span-1 bg-slate-50 dark:bg-slate-950 p-6 rounded-xl border border-slate-200 dark:border-slate-800">
+                <h4 className="font-bold text-slate-800 dark:text-white mb-4">Create Allocation</h4>
                 <form onSubmit={handleAllocate} className="space-y-4">
                     <div>
                         <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Employee Email</label>
