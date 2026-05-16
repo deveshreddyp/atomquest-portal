@@ -11,8 +11,8 @@ import ManagerDashboard from './components/ManagerDashboard';
 import AdminDashboard from './components/AdminDashboard';
 import atombergLogo from './assets/atomberg-logo.png';
 
-export const AtombergLogo = ({ className = "w-8 h-8" }) => (
-  <img src={atombergLogo} alt="Atomberg Logo" className={`${className} object-contain`} />
+export const AtombergLogo = ({ className = "h-8 w-auto" }) => (
+  <img src={atombergLogo} alt="Atomberg Logo" className={`${className} object-contain mix-blend-multiply dark:mix-blend-normal dark:bg-white dark:p-1 dark:rounded-md`} />
 );
 
 function ProtectedRoute({ children, allowedRole }) {
@@ -101,9 +101,11 @@ function App() {
       <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
         <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sticky top-0 z-10 shadow-sm">
           <div className="max-w-6xl mx-auto flex justify-between items-center">
-            <Link to="/" className="text-2xl font-black tracking-tight text-slate-800 dark:text-white flex items-center gap-2">
-              <AtombergLogo className="w-8 h-8 text-slate-900 dark:text-white" />
-              AtomQuest <span className="text-primary text-lg mt-1 font-bold">Portal</span>
+            <Link to="/" className="text-2xl font-black tracking-tight text-slate-800 dark:text-white flex items-center gap-3">
+              <AtombergLogo className="h-10 w-auto" />
+              <div className="flex items-baseline gap-1">
+                 AtomQuest <span className="text-primary text-lg font-bold">Portal</span>
+              </div>
             </Link>
             <nav className="space-x-6 text-sm font-semibold flex items-center">
               <button onClick={() => setIsDark(!isDark)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
@@ -129,8 +131,8 @@ function App() {
             <Route path="/" element={
               user ? <Navigate to={`/${role}`} /> : (
               <div className="text-center py-32 animate-fade-in-up">
-                <div className="flex justify-center mb-6">
-                    <AtombergLogo className="w-20 h-20 text-slate-900 dark:text-white" />
+                <div className="flex justify-center mb-8">
+                    <AtombergLogo className="h-28 w-auto" />
                 </div>
                 <h2 className="text-5xl font-black mb-6 text-slate-800 dark:text-white tracking-tight leading-tight animate-fade-in-up delay-100">Enterprise Goal Tracking.<br/><span className="text-primary">Simplified.</span></h2>
                 <p className="text-slate-500 dark:text-slate-400 mb-10 max-w-xl mx-auto text-lg leading-relaxed animate-fade-in-up delay-200">A minimalist, AI-powered HR goal tracking platform built for the Atomberg Hackathon. Log in to manage your quarterly objectives.</p>

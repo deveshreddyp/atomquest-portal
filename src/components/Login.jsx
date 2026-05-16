@@ -43,7 +43,7 @@ export default function Login() {
     <div className="flex flex-col items-center justify-center min-h-[70vh]">
       <div className="bg-white dark:bg-slate-900 p-10 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-md">
         <div className="text-center mb-8 flex flex-col items-center">
-            <AtombergLogo className="w-12 h-12 text-slate-900 dark:text-white mb-4" />
+            <AtombergLogo className="h-16 w-auto mb-4" />
             <h2 className="text-3xl font-black text-slate-800 dark:text-white">Welcome Back</h2>
             <p className="text-slate-500 dark:text-slate-400 mt-2">Sign in to your Atomberg portal</p>
         </div>
