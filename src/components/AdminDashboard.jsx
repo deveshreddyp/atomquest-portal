@@ -13,6 +13,7 @@ export default function AdminDashboard() {
   const [goals, setGoals] = useState([]);
   const [allocations, setAllocations] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
+  const [systemUsers, setSystemUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuthStore();
 
@@ -42,6 +43,33 @@ export default function AdminDashboard() {
       const snapAlloc = await getDocs(qAlloc);
       setAllocations(snapAlloc.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       
+      const qUsers = query(collection(db, 'system_users'), orderBy('createdAt', 'desc'));
+      const snapUsers = await getDocs(qUsers);
+      let loadedUsers = snapUsers.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      // Auto-seed default test users if they don't exist in the directory
+      const defaultUsers = ['admin@test.com', 'manager@test.com', 'employee@test.com'];
+      const existingEmails = loadedUsers.map(u => u.email);
+      let needsRefetch = false;
+
+      for (const email of defaultUsers) {
+          if (!existingEmails.includes(email)) {
+              await addDoc(collection(db, 'system_users'), {
+                  email: email,
+                  role: email.split('@')[0],
+                  createdAt: serverTimestamp()
+              });
+              needsRefetch = true;
+          }
+      }
+
+      if (needsRefetch) {
+          const newSnap = await getDocs(qUsers);
+          loadedUsers = newSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      }
+      
+      setSystemUsers(loadedUsers);
+
       const snapSettings = await getDoc(doc(db, 'settings', 'system'));
       if (snapSettings.exists()) {
         setActivePhase(snapSettings.data().activePhase);
@@ -67,10 +95,17 @@ export default function AdminDashboard() {
         const secondaryAuth = getAuth(secondaryApp);
         await createUserWithEmailAndPassword(secondaryAuth, newEmail.toLowerCase().trim(), newPassword);
         
+        await addDoc(collection(db, 'system_users'), {
+            email: newEmail.toLowerCase().trim(),
+            role: 'Employee', // default, can be updated later if needed
+            createdAt: serverTimestamp()
+        });
+
         await logAuditAction(user.email, 'CREATE_USER', `Created new system user: ${newEmail}`);
         Swal.fire('Success', `User ${newEmail} created successfully!`, 'success');
         setNewEmail('');
         setNewPassword('');
+        fetchData();
     } catch (err) {
         Swal.fire('Error', "Failed to create user: " + err.message, 'error');
     }
@@ -79,11 +114,24 @@ export default function AdminDashboard() {
 
   const handleAllocate = async (e) => {
     e.preventDefault();
-    if(!empEmail || !mgrEmail) return;
+    const emp = empEmail.toLowerCase().trim();
+    const mgr = mgrEmail.toLowerCase().trim();
+    
+    if(!emp || !mgr) return;
+    if(emp === mgr) {
+        return Swal.fire('Error', 'Employee and Manager cannot be the same person.', 'error');
+    }
+    
+    // Check if both users exist in our system_users collection
+    const userEmails = systemUsers.map(u => u.email);
+    if (!userEmails.includes(emp) || !userEmails.includes(mgr)) {
+        return Swal.fire('Error', 'One or both users do not exist in the System Directory. Please register them first.', 'error');
+    }
+
     try {
         await addDoc(collection(db, 'allocations'), {
-            employeeEmail: empEmail.toLowerCase().trim(),
-            managerEmail: mgrEmail.toLowerCase().trim(),
+            employeeEmail: emp,
+            managerEmail: mgr,
             status: 'pending',
             createdAt: serverTimestamp()
         });
@@ -235,6 +283,34 @@ export default function AdminDashboard() {
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+
+        {/* System User Directory */}
+        <div className="mt-8">
+            <h4 className="font-bold text-slate-800 dark:text-white mb-4">System User Directory</h4>
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden max-h-48 overflow-y-auto">
+                <table className="w-full text-left text-sm whitespace-nowrap">
+                    <thead className="bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 sticky top-0">
+                    <tr>
+                        <th className="px-6 py-3 font-semibold">User Email</th>
+                        <th className="px-6 py-3 font-semibold">Role</th>
+                        <th className="px-6 py-3 font-semibold">Registered At</th>
+                    </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                        {systemUsers.map(u => (
+                            <tr key={u.id} className="hover:bg-slate-50 dark:bg-slate-950">
+                                <td className="px-6 py-3 font-medium text-slate-800 dark:text-white">{u.email}</td>
+                                <td className="px-6 py-3 text-slate-600 dark:text-slate-400">{u.role || 'Employee'}</td>
+                                <td className="px-6 py-3 text-slate-500 text-xs">{u.createdAt?.toDate().toLocaleDateString() || 'Recently'}</td>
+                            </tr>
+                        ))}
+                        {systemUsers.length === 0 && (
+                            <tr><td colSpan="3" className="px-6 py-8 text-center text-slate-500 dark:text-slate-400">No registered users in directory.</td></tr>
+                        )}
+                    </tbody>
+                </table>
             </div>
         </div>
       </div>
