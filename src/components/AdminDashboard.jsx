@@ -239,9 +239,9 @@ export default function AdminDashboard() {
             <Users className="text-yellow-600 dark:text-yellow-400" /> Identity & Roster Management
         </h3>
         
-        <div className="grid grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {/* Create System User */}
-            <div className="col-span-1 bg-slate-50 dark:bg-slate-950 p-6 rounded-xl border border-slate-200 dark:border-slate-800">
+            <div className="bg-slate-50 dark:bg-slate-950 p-6 rounded-xl border border-slate-200 dark:border-slate-800">
                 <h4 className="font-bold text-slate-800 dark:text-white mb-4">Create System User</h4>
                 <form onSubmit={handleCreateUser} className="space-y-4">
                     <div>
@@ -267,7 +267,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Create Allocation */}
-            <div className="col-span-1 bg-slate-50 dark:bg-slate-950 p-6 rounded-xl border border-slate-200 dark:border-slate-800">
+            <div className="bg-slate-50 dark:bg-slate-950 p-6 rounded-xl border border-slate-200 dark:border-slate-800">
                 <h4 className="font-bold text-slate-800 dark:text-white mb-4">Create Allocation</h4>
                 <form onSubmit={handleAllocate} className="space-y-4">
                     <div>
@@ -283,8 +283,10 @@ export default function AdminDashboard() {
                     </button>
                 </form>
             </div>
+        </div>
 
-            <div className="col-span-2">
+        <div className="grid grid-cols-1 gap-6">
+            <div>
                 <h4 className="font-bold text-slate-800 dark:text-white mb-4">Allocation Status Logs</h4>
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden h-64 overflow-y-auto">
                     <table className="w-full text-left text-sm whitespace-nowrap">
