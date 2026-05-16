@@ -170,14 +170,8 @@ export default function EmployeeDashboard() {
   };
 
   const exportPDF = () => {
-    const element = document.getElementById('goal-sheet');
-    html2pdf().from(element).set({
-      margin: 1,
-      filename: 'AtomQuest_Goal_Sheet.pdf',
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    }).save();
-    logAuditAction(user.email, 'EXPORT_PDF', 'Exported goal sheet as PDF');
+    logAuditAction(user.email, 'EXPORT_PDF', 'Initiated goal sheet print/pdf export');
+    window.print();
   };
 
   if (loading) return <div className="text-center py-20">Loading your profile...</div>;
@@ -188,8 +182,8 @@ export default function EmployeeDashboard() {
     
     return (
       <div id="goal-sheet" className="max-w-5xl mx-auto space-y-8 pb-20">
-        <div className="bg-white dark:bg-slate-900 p-10 shadow-sm rounded-2xl border border-slate-200 dark:border-slate-800 text-center relative">
-          <div className="absolute top-6 right-6">
+        <div className="bg-white dark:bg-slate-900 p-10 shadow-sm rounded-2xl border border-slate-200 dark:border-slate-800 text-center relative print:border-none print:shadow-none">
+          <div className="absolute top-6 right-6 print:hidden">
             <button onClick={exportPDF} className="bg-slate-900 text-white flex items-center gap-2 px-4 py-2 rounded-lg font-bold hover:bg-slate-800 text-sm transition-colors shadow-sm" data-html2canvas-ignore="true">
                 <FileDown size={16}/> Export PDF
             </button>
@@ -250,7 +244,7 @@ export default function EmployeeDashboard() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between mt-4">
+              <div className="flex items-center justify-between mt-4 print:hidden">
                   {g.isShared && g.weightage === 0 ? (
                       <div className="flex gap-2 w-full">
                           <input type="number" placeholder="Set Weight %" id={`weight-${g.id}`} className="w-full border rounded-lg p-2 text-sm" />

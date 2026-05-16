@@ -99,7 +99,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
-        <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sticky top-0 z-10 shadow-sm">
+        <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sticky top-0 z-10 shadow-sm print:hidden">
           <div className="max-w-6xl mx-auto flex justify-between items-center">
             <Link to="/" className="text-2xl font-black tracking-tight text-slate-800 dark:text-white flex items-center gap-3 hover:scale-105 transition-transform duration-300">
               <AtombergLogo className="h-10 w-auto" />

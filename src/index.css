@@ -53,3 +53,13 @@
     }
   }
 }
+
+@media print {
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+  @page {
+    margin: 1cm;
+  }
+}
