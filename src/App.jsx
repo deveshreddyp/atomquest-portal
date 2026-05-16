@@ -103,8 +103,8 @@ function App() {
           <div className="max-w-6xl mx-auto flex justify-between items-center">
             <Link to="/" className="text-2xl font-black tracking-tight text-slate-800 dark:text-white flex items-center gap-3 hover:scale-105 transition-transform duration-300">
               <AtombergLogo className="h-10 w-auto" />
-              <div className="flex items-baseline gap-1">
-                 AtomQuest <span className="text-yellow-600 dark:text-yellow-400 text-lg font-bold">Portal</span>
+              <div className="flex items-center gap-3 border-l-2 border-slate-200 dark:border-slate-700 pl-3 ml-1">
+                 <span className="text-slate-800 dark:text-white text-xl font-bold tracking-tight">Portal</span>
               </div>
             </Link>
             <nav className="space-x-6 text-sm font-semibold flex items-center">
