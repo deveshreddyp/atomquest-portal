@@ -10,6 +10,13 @@ import EmployeeDashboard from './components/EmployeeDashboard';
 import ManagerDashboard from './components/ManagerDashboard';
 import AdminDashboard from './components/AdminDashboard';
 
+export const AtombergLogo = ({ className = "w-8 h-8" }) => (
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <path d="M50 10L15 90H35L50 50L65 90H85L50 10Z" fill="currentColor"/>
+    <circle cx="50" cy="70" r="10" fill="#10b981"/>
+  </svg>
+);
+
 function ProtectedRoute({ children, allowedRole }) {
   const { user, role } = useAuthStore();
   if (!user) return <Navigate to="/login" />;
@@ -96,8 +103,9 @@ function App() {
       <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
         <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sticky top-0 z-10 shadow-sm">
           <div className="max-w-6xl mx-auto flex justify-between items-center">
-            <Link to="/" className="text-2xl font-black tracking-tight text-slate-800 dark:text-white">
-              AtomQuest <span className="text-primary">Portal</span>
+            <Link to="/" className="text-2xl font-black tracking-tight text-slate-800 dark:text-white flex items-center gap-2">
+              <AtombergLogo className="w-8 h-8 text-slate-900 dark:text-white" />
+              AtomQuest <span className="text-primary text-lg mt-1 font-bold">Portal</span>
             </Link>
             <nav className="space-x-6 text-sm font-semibold flex items-center">
               <button onClick={() => setIsDark(!isDark)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
@@ -122,10 +130,13 @@ function App() {
           <Routes>
             <Route path="/" element={
               user ? <Navigate to={`/${role}`} /> : (
-              <div className="text-center py-32">
-                <h2 className="text-5xl font-black mb-6 text-slate-800 dark:text-white tracking-tight leading-tight">Enterprise Goal Tracking.<br/><span className="text-primary">Simplified.</span></h2>
-                <p className="text-slate-500 dark:text-slate-400 mb-10 max-w-xl mx-auto text-lg leading-relaxed">A minimalist, AI-powered HR goal tracking platform built for the AtomQuest Hackathon 1.0. Log in to manage your quarterly objectives.</p>
-                <div className="flex gap-4 justify-center">
+              <div className="text-center py-32 animate-fade-in-up">
+                <div className="flex justify-center mb-6">
+                    <AtombergLogo className="w-20 h-20 text-slate-900 dark:text-white" />
+                </div>
+                <h2 className="text-5xl font-black mb-6 text-slate-800 dark:text-white tracking-tight leading-tight animate-fade-in-up delay-100">Enterprise Goal Tracking.<br/><span className="text-primary">Simplified.</span></h2>
+                <p className="text-slate-500 dark:text-slate-400 mb-10 max-w-xl mx-auto text-lg leading-relaxed animate-fade-in-up delay-200">A minimalist, AI-powered HR goal tracking platform built for the Atomberg Hackathon. Log in to manage your quarterly objectives.</p>
+                <div className="flex gap-4 justify-center animate-fade-in-up delay-200">
                     <button onClick={handleViewGuide} className="inline-block bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 px-8 py-4 rounded-full font-bold shadow-sm hover:shadow-md transition-all">
                       📖 View System Guide
                     </button>
