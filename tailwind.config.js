@@ -8,7 +8,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#10b981", // Emerald green accent
+        primary: "#FDB913", // Atomberg Yellow
         background: "#ffffff",
         foreground: "#0f172a", // Slate 900
         muted: "#f1f5f9", // Slate 100

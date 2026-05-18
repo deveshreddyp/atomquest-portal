@@ -203,10 +203,10 @@ export default function AdminDashboard() {
   }, {});
   
   const pieData = Object.keys(thrustAreaCounts).map(key => ({ name: key, value: thrustAreaCounts[key] }));
-  const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
+  const COLORS = ['#FDB913', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
   const statusData = [
     { name: 'Pending Review', value: goals.filter(g => g.status === 'pending').length, fill: '#f59e0b' },
-    { name: 'Approved & Locked', value: goals.filter(g => g.status === 'approved').length, fill: '#10b981' }
+    { name: 'Approved & Locked', value: goals.filter(g => g.status === 'approved').length, fill: '#FDB913' }
   ];
 
   return (

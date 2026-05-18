@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
-import { collection, serverTimestamp, writeBatch, doc, query, where, getDocs, updateDoc, getDoc } from 'firebase/firestore';
+import { collection, serverTimestamp, writeBatch, doc, query, where, getDocs, updateDoc, getDoc, addDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuthStore } from '../store';
 import { Target, CheckCircle2, AlertCircle, FileDown } from 'lucide-react';
@@ -28,6 +28,9 @@ export default function EmployeeDashboard() {
   const [updateGoalId, setUpdateGoalId] = useState(null);
   const [actualVal, setActualVal] = useState('');
   const [progStatus, setProgStatus] = useState('On Track');
+  
+  const [showNewGoalForm, setShowNewGoalForm] = useState(false);
+  const [newGoal, setNewGoal] = useState({ thrustArea: 'Operations', title: '', description: '', uomType: 'min', target: 0, weightage: 0 });
 
   useEffect(() => {
     fetchMyGoals();
@@ -125,9 +128,30 @@ export default function EmployeeDashboard() {
   const handleSetSharedWeight = async (goalId, newWeight) => {
       // In a real app, we'd check total weight again, but for hackathon demo we just update the individual document.
       try {
-          await updateDoc(doc(db, 'goals', goalId), { weightage: Number(newWeight), status: 'pending' });
+          await updateDoc(doc(db, 'goals', goalId), { weightage: Number(newWeight), status: 'approved', isLocked: true });
           fetchMyGoals();
       } catch (err) { Swal.fire('Notification', "Failed to update weight.", 'info'); }
+  };
+
+  const handleAddNewGoal = async (e) => {
+      e.preventDefault();
+      try {
+          await addDoc(collection(db, 'goals'), {
+              ...newGoal,
+              employeeId: user.uid,
+              employeeEmail: user.email,
+              status: 'pending',
+              createdAt: serverTimestamp(),
+              isLocked: false,
+              isShared: false
+          });
+          setShowNewGoalForm(false);
+          setNewGoal({ thrustArea: 'Operations', title: '', description: '', uomType: 'min', target: 0, weightage: 0 });
+          Swal.fire('Success', 'New goal added and sent for approval', 'success');
+          fetchMyGoals();
+      } catch (err) {
+          Swal.fire('Error', 'Failed to add goal', 'error');
+      }
   };
 
   const handleResubmitGoal = async (goalId, currentTarget) => {
@@ -177,7 +201,7 @@ export default function EmployeeDashboard() {
   if (loading) return <div className="text-center py-20">Loading your profile...</div>;
 
   if (existingGoals) {
-    const isApproved = existingGoals.every(g => g.status === 'approved');
+    const isApproved = existingGoals.every(g => g.status === 'approved' || (g.isShared && g.weightage === 0));
     const hasConflict = existingGoals.some(g => g.status === 'conflict');
     
     return (
@@ -256,7 +280,7 @@ export default function EmployeeDashboard() {
                       </div>
                   )}
 
-                  {isApproved && (!g.isShared || g.weightage > 0) && (
+                  {g.status === 'approved' && (!g.isShared || g.weightage > 0) && (
                       <button 
                           onClick={() => setUpdateGoalId(g.id)} 
                           disabled={activePhase === 'Goal Setting'}
@@ -277,6 +301,60 @@ export default function EmployeeDashboard() {
               </div>
             </div>
           )})}
+        </div>
+
+        {/* Add New Goal Form */}
+        <div className="text-center mt-8 print:hidden">
+            {!showNewGoalForm ? (
+                <button onClick={() => setShowNewGoalForm(true)} className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold py-3 px-6 rounded-lg hover:bg-slate-200 transition-colors">
+                    + Add New Goal
+                </button>
+            ) : (
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 text-left max-w-2xl mx-auto">
+                    <h3 className="font-bold text-lg mb-4 text-slate-800 dark:text-white">Add New Goal</h3>
+                    <form onSubmit={handleAddNewGoal} className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-semibold mb-1 text-slate-700 dark:text-slate-200">Thrust Area</label>
+                                <select value={newGoal.thrustArea} onChange={e=>setNewGoal({...newGoal, thrustArea: e.target.value})} className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 outline-none focus:border-primary bg-white dark:bg-slate-900">
+                                    <option value="Operations">Operations</option>
+                                    <option value="Sales">Sales</option>
+                                    <option value="Quality">Quality</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold mb-1 text-slate-700 dark:text-slate-200">Title</label>
+                                <input type="text" value={newGoal.title} onChange={e=>setNewGoal({...newGoal, title: e.target.value})} required className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 outline-none focus:border-primary bg-white dark:bg-slate-900"/>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold mb-1 text-slate-700 dark:text-slate-200">Description</label>
+                            <textarea value={newGoal.description} onChange={e=>setNewGoal({...newGoal, description: e.target.value})} required className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 outline-none focus:border-primary bg-white dark:bg-slate-900 resize-none" rows="2"></textarea>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                            <div>
+                                <label className="block text-sm font-semibold mb-1 text-slate-700 dark:text-slate-200">UoM</label>
+                                <select value={newGoal.uomType} onChange={e=>setNewGoal({...newGoal, uomType: e.target.value})} className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 outline-none focus:border-primary bg-white dark:bg-slate-900">
+                                    <option value="min">Min</option>
+                                    <option value="max">Max</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold mb-1 text-slate-700 dark:text-slate-200">Target</label>
+                                <input type="number" value={newGoal.target} onChange={e=>setNewGoal({...newGoal, target: Number(e.target.value)})} required className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 outline-none focus:border-primary bg-white dark:bg-slate-900"/>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold mb-1 text-slate-700 dark:text-slate-200">Weight (%)</label>
+                                <input type="number" value={newGoal.weightage} onChange={e=>setNewGoal({...newGoal, weightage: Number(e.target.value)})} required className="w-full border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 outline-none focus:border-primary bg-white dark:bg-slate-900"/>
+                            </div>
+                        </div>
+                        <div className="flex gap-3 justify-end mt-4">
+                            <button type="button" onClick={() => setShowNewGoalForm(false)} className="px-4 py-2 font-bold text-slate-500 hover:text-slate-700 transition-colors">Cancel</button>
+                            <button type="submit" className="px-4 py-2 font-bold bg-primary text-slate-900 rounded-lg hover:brightness-110 transition-colors">Submit Goal</button>
+                        </div>
+                    </form>
+                </div>
+            )}
         </div>
 
         {/* Update Progress Modal */}

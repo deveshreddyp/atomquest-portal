@@ -58,7 +58,7 @@ function App() {
       text: "Are you sure you want to log out of the AtomQuest portal?",
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#10b981',
+      confirmButtonColor: '#FDB913',
       cancelButtonColor: '#ef4444',
       confirmButtonText: 'Yes, log out!'
     }).then((result) => {
@@ -85,7 +85,7 @@ function App() {
       imageWidth: '100%',
       imageAlt: 'System Architecture Flow',
       width: '900px',
-      confirmButtonColor: '#10b981',
+      confirmButtonColor: '#FDB913',
       confirmButtonText: 'Enter Portal'
     }).then((res) => {
         if(res.isConfirmed) {
